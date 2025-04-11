@@ -54,12 +54,12 @@
       }
       .synonyms {
         font-size: 16px;
-        margin: 8px 0;
+        margin: 4px 0;
         color: #555;
       }
       .description {
         font-size: 14px;
-        margin-top: 10px;
+        margin-top: 12px;
         line-height: 1.4;
       }
     </style>
@@ -75,8 +75,8 @@
     </div>
 
     <script>
-      // Türkçe karakter desteği ile büyük harfe çevirme fonksiyonu
       function toTurkishUpperCase(text) {
+        if (!text) return '';
         return text.replace(/i/g, 'İ')
                   .replace(/ı/g, 'I')
                   .replace(/ğ/g, 'Ğ')
@@ -178,7 +178,7 @@
         resultDiv.innerHTML = `
           <DIV>
             <H2>${toTurkishUpperCase(word.Sözcük)}</H2>
-            ${synonyms ? `<DIV CLASS="SYNONYMS">${synonyms}</DIV>` : ''}
+            <DIV CLASS="SYNONYMS">${synonyms}</DIV>
             <DIV CLASS="DESCRIPTION">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</DIV>
           </DIV>
         `;
