@@ -51,27 +51,25 @@
         background-color: #f8f9fa;
         border-radius: 4px;
         text-transform: uppercase;
-        height: 200px; /* Sabit yükseklik */
+        min-height: 200px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between; /* Elemanları eşit aralıklarla dağıt */
+        justify-content: space-between;
       }
       .word-title {
         font-size: 24px;
         font-weight: bold;
-        align-self: flex-start; /* Yukarı yasla */
-        margin-top: 0;
+        margin: 0;
       }
       .synonyms {
         font-size: 18px;
         color: #555;
-        align-self: center; /* Ortala */
+        margin: 10px 0;
       }
       .description {
         font-size: 16px;
         line-height: 1.4;
-        align-self: flex-end; /* Aşağı yasla */
-        margin-bottom: 0;
+        margin: 0;
       }
     </style>
 </head>
@@ -86,7 +84,105 @@
     </div>
 
     <script>
-      // ... (Önceki JavaScript kodunuz aynen kalacak, sadece CSS değişti) ...
+      function toTurkishUpperCase(text) {
+        if (!text) return '';
+        return text.replace(/i/g, 'İ')
+                  .replace(/ı/g, 'I')
+                  .replace(/ğ/g, 'Ğ')
+                  .replace(/ü/g, 'Ü')
+                  .replace(/ş/g, 'Ş')
+                  .replace(/ö/g, 'Ö')
+                  .replace(/ç/g, 'Ç')
+                  .toUpperCase();
+      }
+
+      let allWords = [];
+      let lastSelectedWord = null;
+
+      async function fetchWords() {
+        const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
+        const sheetName = 'Sayfa1';
+        const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+
+        try {
+          const response = await fetch(url);
+          allWords = await response.json();
+          setupSearch();
+        } catch (error) {
+          console.error('VERİ ÇEKME HATASI:', error);
+          document.getElementById('result').innerHTML = 
+            '<P STYLE="COLOR: RED;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</P>';
+        }
+      }
+
+      function setupSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsDiv = document.getElementById('suggestions');
+
+        searchInput.addEventListener('input', function() {
+          const query = toTurkishUpperCase(this.value.trim());
+          
+          if (!query) {
+            suggestionsDiv.innerHTML = '';
+            document.getElementById('result').innerHTML = '';
+            return;
+          }
+
+          const matches = allWords.filter(row => {
+            const word = row.Sözcük || '';
+            const synonyms = row['Eş Anlamlılar'] || '';
+            return toTurkishUpperCase(word).includes(query) || 
+                   toTurkishUpperCase(synonyms).includes(query);
+          });
+
+          displaySuggestions(matches);
+        });
+      }
+
+      function displaySuggestions(matches) {
+        const suggestionsDiv = document.getElementById('suggestions');
+        suggestionsDiv.innerHTML = '';
+
+        const sortedMatches = matches.sort((a, b) => {
+          return toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük));
+        });
+
+        const topMatches = sortedMatches.slice(0, 6);
+
+        if (topMatches.length === 0) {
+          suggestionsDiv.innerHTML = '<DIV CLASS="SUGGESTION">SONUÇ BULUNAMADI</DIV>';
+          return;
+        }
+
+        topMatches.forEach(match => {
+          const suggestion = document.createElement('div');
+          suggestion.textContent = toTurkishUpperCase(match.Sözcük);
+          suggestion.classList.add('suggestion');
+          suggestion.addEventListener('click', () => selectWord(match));
+          suggestionsDiv.appendChild(suggestion);
+        });
+      }
+
+      function selectWord(word) {
+        lastSelectedWord = word;
+        document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
+        document.getElementById('suggestions').innerHTML = '';
+        showResult(word);
+      }
+
+      function showResult(word) {
+        const resultDiv = document.getElementById('result');
+        if (!word) return;
+
+        const synonyms = word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : '';
+        resultDiv.innerHTML = `
+          <DIV CLASS="word-title">${toTurkishUpperCase(word.Sözcük)}</DIV>
+          <DIV CLASS="synonyms">${synonyms}</DIV>
+          <DIV CLASS="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</DIV>
+        `;
+      }
+
+      window.onload = fetchWords;
     </script>
 </body>
 </html>
