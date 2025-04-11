@@ -46,10 +46,6 @@
         background-color: #f8f9fa;
         border-radius: 4px;
       }
-      .highlight {
-        background-color: yellow;
-        font-weight: bold;
-      }
     </style>
 </head>
 <body>
@@ -114,10 +110,10 @@
           return wordMatch || synonymsMatch;
         });
 
-        displaySuggestions(matches, query);
+        displaySuggestions(matches);
       }
 
-      function displaySuggestions(matches, query) {
+      function displaySuggestions(matches) {
         const suggestionsDiv = document.getElementById('suggestions');
         suggestionsDiv.innerHTML = '';
 
@@ -131,7 +127,7 @@
 
         topMatches.forEach(match => {
           const suggestion = document.createElement('div');
-          suggestion.innerHTML = highlightMatch(match.Sözcük, query);
+          suggestion.textContent = match.Sözcük; // Vurgu olmadan direkt metin
           suggestion.classList.add('suggestion');
           suggestion.addEventListener('click', () => selectWord(match));
           suggestionsDiv.appendChild(suggestion);
@@ -156,13 +152,6 @@
             <p>${word.Açıklama || 'Açıklama bulunmamaktadır.'}</p>
           </div>
         `;
-      }
-
-      // Aramada vurgulama yapar
-      function highlightMatch(text, query) {
-        if (!query) return text;
-        const regex = new RegExp(`(${query})`, 'gi');
-        return text.replace(regex, '<span class="highlight">$1</span>');
       }
 
       window.onload = fetchWords;
