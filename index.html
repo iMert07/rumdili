@@ -135,26 +135,17 @@
             return;
           }
 
-          // 1. Önce asıl sözcüklerde başlangıca göre ara
-          const mainWordMatches = allWords.filter(row => {
+          const matches = allWords.filter(row => {
             const word = toTurkishUpperCase(row.Sözcük || '');
-            return word.startsWith(query);
-          });
-
-          // 2. Eş anlamlılarda tam eşleşme ara (başlangıç değil)
-          const synonymMatches = allWords.filter(row => {
             const synonyms = row['Eş Anlamlılar'] ? 
                            toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-            return synonyms.some(syn => syn === query);
+            
+            // ASIL SÖZCÜKTE BAŞLANGIÇ VEYA EŞ ANLAMLIDA İÇERME
+            return word.startsWith(query) || 
+                   synonyms.some(syn => syn.includes(query));
           });
 
-          // 3. Birleştir ve tekrarları kaldır
-          const allMatches = [...mainWordMatches, ...synonymMatches];
-          const uniqueMatches = allMatches.filter((item, index, self) =>
-            index === self.findIndex(t => t.Sözcük === item.Sözcük)
-          );
-
-          displaySuggestions(uniqueMatches, query);
+          displaySuggestions(matches, query);
         });
         
         searchInput.addEventListener('keydown', (e) => {
@@ -171,32 +162,42 @@
         const suggestionsDiv = document.getElementById('suggestions');
         suggestionsDiv.innerHTML = '';
 
-        if (matches.length === 0) {
+        // ASIL SÖZCÜĞE GÖRE ALFABETİK SIRALAMA
+        const sortedMatches = matches.sort((a, b) => {
+          return toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük));
+        });
+
+        const topMatches = sortedMatches.slice(0, 6);
+
+        if (topMatches.length === 0) {
           suggestionsDiv.innerHTML = '<div class="suggestion">SONUÇ BULUNAMADI</div>';
           return;
         }
 
-        // Asıl sözcük alfabetik sıra + eş anlamlılar
-        matches.sort((a, b) => toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük)))
-              .slice(0, 6)
-              .forEach(match => {
-                const suggestion = document.createElement('div');
-                suggestion.className = 'suggestion';
-                
-                const word = toTurkishUpperCase(match.Sözcük);
-                const synonyms = match['Eş Anlamlılar'] ? 
-                               toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-                
-                // Eş anlamlı tam eşleşme varsa göster
-                const matchedSynonym = synonyms.find(syn => syn === query);
+        topMatches.forEach(match => {
+          const suggestion = document.createElement('div');
+          suggestion.classList.add('suggestion');
+          
+          const word = toTurkishUpperCase(match.Sözcük);
+          const synonyms = match['Eş Anlamlılar'] ? 
+                         toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
+          
+          // EŞ ANLAMLIDAN EŞLEŞME VARSA GÖSTER
+          const matchedSynonym = synonyms.find(syn => syn.includes(query) && 
+                               !word.includes(query);
 
-                suggestion.innerHTML = matchedSynonym ? 
-                  `<span class="main-word">${word}</span>` : 
-                  `<span class="main-word">${word}</span>`;
-                
-                suggestion.addEventListener('click', () => selectWord(match));
-                suggestionsDiv.appendChild(suggestion);
-              });
+          if (matchedSynonym) {
+            suggestion.innerHTML = `
+              <span class="main-word">${word}</span>
+              <span class="synonym-hint">${matchedSynonym}</span>
+            `;
+          } else {
+            suggestion.innerHTML = `<span class="main-word">${word}</span>`;
+          }
+
+          suggestion.addEventListener('click', () => selectWord(match));
+          suggestionsDiv.appendChild(suggestion);
+        });
       }
 
       function selectWord(word) {
