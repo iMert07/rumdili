@@ -38,51 +38,52 @@
             const query = searchInput.value.trim().toLowerCase();
 
             if (query === '') {
-              // Eğer arama kutusu boşsa, önerileri temizle
+              // Eğer arama kutusu boşsa, önerileri temizle ve sonuçları boşalt
               suggestionsDiv.innerHTML = '';
               showResult(null); // Sonuçları temizle
-            } else {
-              // Sadece yeni arama yapıldığında sonuçları güncelle
-              if (query !== lastSearchQuery) {
-                lastSearchQuery = query;
-                showResult(null); // Sonuç ekranını boşalt
-              }
-
-              // Kısmi eşleşme yapan kelimeleri buluyoruz
-              const matches = data.filter(row => {
-                const wordMatch = row.Sözcük?.toLowerCase().includes(query); // Sözcükte kısmi eşleşme
-                const synonymsMatch = row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).some(syn => syn.includes(query)); // Eş anlamlılarda kısmi eşleşme
-                return wordMatch || synonymsMatch;
-              });
-
-              // Öneri listesini oluşturuyoruz
-              suggestionsDiv.innerHTML = '';
-
-              // En hızlı eşleşen kelimeleri önce göster
-              const sortedMatches = matches
-                .sort((a, b) => {
-                  // Kısa kelimeler önce sıralansın
-                  const lengthDifference = a.Sözcük.length - b.Sözcük.length;
-                  if (lengthDifference !== 0) return lengthDifference;
-
-                  // Uzun kelimeler eşit uzunluktaysa, alfabetik sıralama yapılır
-                  return a.Sözcük.localeCompare(b.Sözcük);
-                });
-
-              // Sadece 6 öneri gösterecek
-              const topMatches = sortedMatches.slice(0, 6);
-
-              topMatches.forEach(match => {
-                const suggestion = document.createElement('div');
-                suggestion.textContent = match.Sözcük;
-                suggestion.classList.add('suggestion');
-                suggestion.addEventListener('click', () => {
-                  selectedWord = match; // Seçilen kelimeyi kaydet
-                  showResult(match); // Sonucu güncelle
-                });
-                suggestionsDiv.appendChild(suggestion);
-              });
+              return;
             }
+
+            if (query !== lastSearchQuery) {
+              // Sadece yeni arama yapıldığında sonuçları güncelle
+              lastSearchQuery = query;
+              showResult(null); // Sonuç ekranını boşalt
+            }
+
+            // Kısmi eşleşme yapan kelimeleri buluyoruz
+            const matches = data.filter(row => {
+              const wordMatch = row.Sözcük?.toLowerCase().includes(query); // Sözcükte kısmi eşleşme
+              const synonymsMatch = row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).some(syn => syn.includes(query)); // Eş anlamlılarda kısmi eşleşme
+              return wordMatch || synonymsMatch;
+            });
+
+            // Öneri listesini oluşturuyoruz
+            suggestionsDiv.innerHTML = '';
+
+            // En hızlı eşleşen kelimeleri önce göster
+            const sortedMatches = matches
+              .sort((a, b) => {
+                // Kısa kelimeler önce sıralansın
+                const lengthDifference = a.Sözcük.length - b.Sözcük.length;
+                if (lengthDifference !== 0) return lengthDifference;
+
+                // Uzun kelimeler eşit uzunluktaysa, alfabetik sıralama yapılır
+                return a.Sözcük.localeCompare(b.Sözcük);
+              });
+
+            // Sadece 6 öneri gösterecek
+            const topMatches = sortedMatches.slice(0, 6);
+
+            topMatches.forEach(match => {
+              const suggestion = document.createElement('div');
+              suggestion.textContent = match.Sözcük;
+              suggestion.classList.add('suggestion');
+              suggestion.addEventListener('click', () => {
+                selectedWord = match; // Seçilen kelimeyi kaydet
+                showResult(match); // Sonucu güncelle
+              });
+              suggestionsDiv.appendChild(suggestion);
+            });
           });
 
           // Sonuçları göster
