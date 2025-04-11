@@ -26,6 +26,7 @@
           const searchInput = document.getElementById('searchInput');
           const resultDiv = document.getElementById('result');
 
+          // Her harf girişiyle anında arama
           searchInput.addEventListener('input', () => {
             const query = searchInput.value.trim().toLowerCase();
             if (!query) {
@@ -33,10 +34,10 @@
               return;
             }
 
-            // Arama yapmak için filter fonksiyonunu kullanalım
+            // Arama yaparken kısmi eşleşme
             const matches = data.filter(row => {
-              const wordMatch = row.Sözcük?.toLowerCase().includes(query);
-              const synonymsMatch = row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).some(syn => syn.includes(query));
+              const wordMatch = row.Sözcük?.toLowerCase().includes(query); // Sözcükte kısmi eşleşme
+              const synonymsMatch = row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).some(syn => syn.includes(query)); // Eş anlamlılarda kısmi eşleşme
 
               return wordMatch || synonymsMatch;
             });
