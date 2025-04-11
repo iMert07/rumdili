@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -136,13 +137,11 @@
           }
 
           const matches = allWords.filter(row => {
-            const word = toTurkishUpperCase(row.Sözcük || '');
+            const wordMatch = toTurkishUpperCase(row.Sözcük || '').includes(query);
             const synonyms = row['Eş Anlamlılar'] ? 
                            toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-            
-            // ASIL SÖZCÜKTE BAŞLANGIÇ VEYA EŞ ANLAMLIDA İÇERME
-            return word.startsWith(query) || 
-                   synonyms.some(syn => syn.includes(query));
+            const synonymsMatch = synonyms.some(syn => syn.includes(query));
+            return wordMatch || synonymsMatch;
           });
 
           displaySuggestions(matches, query);
@@ -162,42 +161,33 @@
         const suggestionsDiv = document.getElementById('suggestions');
         suggestionsDiv.innerHTML = '';
 
-        // ASIL SÖZCÜĞE GÖRE ALFABETİK SIRALAMA
-        const sortedMatches = matches.sort((a, b) => {
-          return toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük));
-        });
-
-        const topMatches = sortedMatches.slice(0, 6);
-
-        if (topMatches.length === 0) {
+        if (matches.length === 0) {
           suggestionsDiv.innerHTML = '<div class="suggestion">SONUÇ BULUNAMADI</div>';
           return;
         }
 
-        topMatches.forEach(match => {
-          const suggestion = document.createElement('div');
-          suggestion.classList.add('suggestion');
-          
-          const word = toTurkishUpperCase(match.Sözcük);
-          const synonyms = match['Eş Anlamlılar'] ? 
-                         toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-          
-          // EŞ ANLAMLIDAN EŞLEŞME VARSA GÖSTER
-          const matchedSynonym = synonyms.find(syn => syn.includes(query) && 
-                               !word.includes(query);
+        matches.sort((a, b) => toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük)))
+              .slice(0, 6)
+              .forEach(match => {
+                const suggestion = document.createElement('div');
+                suggestion.className = 'suggestion';
+                
+                const word = toTurkishUpperCase(match.Sözcük);
+                const synonyms = match['Eş Anlamlılar'] ? 
+                               toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
+                
+                // Eş anlamlılardan eşleşeni bul (ama asıl sözcükte eşleşme yoksa)
+                const matchedSynonym = !word.includes(query) ? 
+                                     synonyms.find(syn => syn.includes(query)) : null;
 
-          if (matchedSynonym) {
-            suggestion.innerHTML = `
-              <span class="main-word">${word}</span>
-              <span class="synonym-hint">${matchedSynonym}</span>
-            `;
-          } else {
-            suggestion.innerHTML = `<span class="main-word">${word}</span>`;
-          }
+                suggestion.innerHTML = `
+                  <span class="main-word">${word}</span>
+                  ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
+                `;
 
-          suggestion.addEventListener('click', () => selectWord(match));
-          suggestionsDiv.appendChild(suggestion);
-        });
+                suggestion.addEventListener('click', () => selectWord(match));
+                suggestionsDiv.appendChild(suggestion);
+              });
       }
 
       function selectWord(word) {
