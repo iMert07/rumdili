@@ -34,10 +34,12 @@
             }
 
             // Arama yapmak için filter fonksiyonunu kullanalım
-            const matches = data.filter(row =>
-              row.Sözcük?.toLowerCase().includes(query) || // Kısmi eşleşme
-              row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).includes(query) // Eş anlamlıları da kontrol et
-            );
+            const matches = data.filter(row => {
+              const wordMatch = row.Sözcük?.toLowerCase().includes(query);
+              const synonymsMatch = row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).some(syn => syn.includes(query));
+
+              return wordMatch || synonymsMatch;
+            });
 
             if (matches.length > 0) {
               resultDiv.innerHTML = matches.map(match => `
