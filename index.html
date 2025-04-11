@@ -58,6 +58,7 @@
 
     <script>
       let allWords = []; // Tüm kelimeleri bellekte tut
+      let lastSelectedWord = null; // Son seçilen kelimeyi sakla
 
       async function fetchWords() {
         const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
@@ -98,8 +99,8 @@
         const suggestionsDiv = document.getElementById('suggestions');
         
         if (!query) {
-          suggestionsDiv.innerHTML = '';
-          document.getElementById('result').innerHTML = '';
+          suggestionsDiv.innerHTML = ''; // Sadece önerileri temizle
+          // Sonuç ekranını temizleme, son seçilen kelimeyi koru
           return;
         }
 
@@ -127,7 +128,7 @@
 
         topMatches.forEach(match => {
           const suggestion = document.createElement('div');
-          suggestion.textContent = match.Sözcük; // Vurgu olmadan direkt metin
+          suggestion.textContent = match.Sözcük;
           suggestion.classList.add('suggestion');
           suggestion.addEventListener('click', () => selectWord(match));
           suggestionsDiv.appendChild(suggestion);
@@ -135,6 +136,7 @@
       }
 
       function selectWord(word) {
+        lastSelectedWord = word; // Seçilen kelimeyi sakla
         document.getElementById('searchInput').value = word.Sözcük;
         document.getElementById('suggestions').innerHTML = '';
         showResult(word);
