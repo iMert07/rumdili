@@ -122,6 +122,13 @@
         margin-top: 10px;
       }
 
+      /* Önerilerin altında belirli boşluk bırakmak için */
+      #suggestions::after {
+        content: "";
+        display: block;
+        height: 20px;  /* Öneri kısmının altına 20px boşluk bırakıyoruz */
+      }
+
       /* Sonuç kısmı önerilerin altında yer alacak */
       #result {
         margin-top: 20px;
