@@ -9,8 +9,10 @@
 <body>
     <div class="container">
         <h1>Yapay Dil Sözlüğü</h1>
-        <input type="text" id="searchInput" placeholder="Kelime ara...">
-        <div id="suggestions"></div> <!-- Öneri Listesi -->
+        <div id="searchWrapper">
+            <input type="text" id="searchInput" placeholder="Kelime ara...">
+            <div id="suggestions"></div> <!-- Öneri Listesi -->
+        </div>
         <div id="result"></div> <!-- Sonuç Ekranı -->
     </div>
 
@@ -27,7 +29,6 @@
           const searchInput = document.getElementById('searchInput');
           const resultDiv = document.getElementById('result');
           const suggestionsDiv = document.getElementById('suggestions'); // Öneri alanı
-          const searchWrapper = document.getElementById('searchWrapper'); // Arama kutusunun bulunduğu alan
 
           let selectedWord = null; // Seçilen kelimeyi tutacak
           let lastSearchQuery = ''; // Son arama sorgusunu tutacak
@@ -118,7 +119,7 @@
 
       /* Arama çubuğunun altına boşluk ekledik */
       #searchWrapper {
-        margin-bottom: 100px; /* Burada 6 öneri sığacak kadar boşluk bırakıyoruz */
+        margin-bottom: 120px; /* 6 öneri sığacak kadar boşluk bırakıldı */
       }
 
       /* Öneri kısmının boyutunu sabitle */
