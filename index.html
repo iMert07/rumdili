@@ -9,10 +9,8 @@
 <body>
     <div class="container">
         <h1>Yapay Dil Sözlüğü</h1>
-        <div id="searchWrapper">
-            <input type="text" id="searchInput" placeholder="Kelime ara...">
-            <div id="suggestions"></div> <!-- Öneri Listesi -->
-        </div>
+        <input type="text" id="searchInput" placeholder="Kelime ara...">
+        <div id="suggestions"></div> <!-- Öneri Listesi -->
         <div id="result"></div> <!-- Sonuç Ekranı -->
     </div>
 
@@ -28,105 +26,82 @@
 
           const searchInput = document.getElementById('searchInput');
           const resultDiv = document.getElementById('result');
-          const suggestionsDiv = document.getElementById('suggestions');
+          const suggestionsDiv = document.getElementById('suggestions'); // Öneri alanı
 
-          let selectedWord = null; // Şu an gösterilen kelime
+          let selectedWord = null; // Seçilen kelimeyi tutacak
+          let lastSearchQuery = ''; // Son arama sorgusunu tutacak
 
-          // Başlangıçta ekran boş
-          showResult(null);
-          suggestionsDiv.innerHTML = '';
+          // Her harf girişiyle anında arama
+          searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
 
-          // Öneri listesini güncelleyen fonksiyon
-          function updateSuggestions(query) {
-            suggestionsDiv.innerHTML = '';
-            if (query === '') return;
+            if (query === '') {
+              // Arama kutusu boşsa, önerileri temizle
+              suggestionsDiv.innerHTML = '';
+              showResult(null); // Sonuç ekranını temizle
+              return;
+            }
 
-            // Kısmi eşleşme yapan kelimeleri bul
+            if (query !== lastSearchQuery) {
+              // Eğer arama sorgusu değişirse, sonucu temizle
+              lastSearchQuery = query;
+              showResult(null); // Sonuç ekranını boşalt
+            }
+
+            // Kısmi eşleşme yapan kelimeleri buluyoruz
             const matches = data.filter(row => {
-              const wordMatch = row.Sözcük?.toLowerCase().includes(query);
-              const synonymsMatch = row['Eş Anlamlılar']?.toLowerCase()
-                .split(',')
-                .map(x => x.trim())
-                .some(syn => syn.includes(query));
+              const wordMatch = row.Sözcük?.toLowerCase().includes(query); // Sözcükte kısmi eşleşme
+              const synonymsMatch = row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).some(syn => syn.includes(query)); // Eş anlamlılarda kısmi eşleşme
               return wordMatch || synonymsMatch;
             });
 
-            // Önerileri sırala (kısa kelimeler önce)
-            const sortedMatches = matches.sort((a, b) => {
-              const lengthDifference = a.Sözcük.length - b.Sözcük.length;
-              if (lengthDifference !== 0) return lengthDifference;
-              return a.Sözcük.localeCompare(b.Sözcük);
-            });
+            // Öneri listesini oluşturuyoruz
+            suggestionsDiv.innerHTML = '';
 
-            // İlk 6 öneriyi göster
+            // En hızlı eşleşen kelimeleri önce göster
+            const sortedMatches = matches
+              .sort((a, b) => {
+                // Kısa kelimeler önce sıralansın
+                const lengthDifference = a.Sözcük.length - b.Sözcük.length;
+                if (lengthDifference !== 0) return lengthDifference;
+
+                // Uzun kelimeler eşit uzunluktaysa, alfabetik sıralama yapılır
+                return a.Sözcük.localeCompare(b.Sözcük);
+              });
+
+            // Sadece 6 öneri gösterecek
             const topMatches = sortedMatches.slice(0, 6);
+
             topMatches.forEach(match => {
               const suggestion = document.createElement('div');
               suggestion.textContent = match.Sözcük;
               suggestion.classList.add('suggestion');
               suggestion.addEventListener('click', () => {
-                selectedWord = match; // Yeni kelime seçildi
+                selectedWord = match; // Seçilen kelimeyi kaydet
                 showResult(match); // Sonucu güncelle
+                searchInput.value = match.Sözcük; // Arama kutusuna seçilen kelimeyi ekle
                 suggestionsDiv.innerHTML = ''; // Önerileri temizle
-                searchInput.value = match.Sözcük; // Arama çubuğunu güncelle
               });
               suggestionsDiv.appendChild(suggestion);
             });
-          }
+          });
 
-          // Sonuç ekranını güncelleyen fonksiyon
+          // Sonuçları göster
           function showResult(word) {
             if (word) {
               resultDiv.innerHTML = `
                 <div>
                   <strong>${word.Sözcük}</strong><br>
-                  <span style="color: gray;">(${word['Eş Anlamlılar'] || ''})</span><br>
+                  <span style="color: gray;">(${word['Eş Anlamlılar']})</span><br>
                   <p>${word.Açıklama || ''}</p>
                 </div>
               `;
             } else {
-              resultDiv.innerHTML = ''; // Boş ekran
+              resultDiv.innerHTML = ''; // Başlangıçta boş olacak
             }
           }
-
-          // Arama çubuğuna her yazıldığında öneriler güncellenir
-          searchInput.addEventListener('input', () => {
-            const query = searchInput.value.trim().toLowerCase();
-            updateSuggestions(query);
-          });
-
-          // Enter tuşuyla arama
-          searchInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-              const query = searchInput.value.trim().toLowerCase();
-              suggestionsDiv.innerHTML = ''; // Önerileri temizle
-
-              if (query === '') {
-                selectedWord = null;
-                showResult(null);
-                return;
-              }
-
-              // En iyi eşleşmeyi bul
-              const bestMatch = data.find(row => row.Sözcük?.toLowerCase() === query) ||
-                              data.find(row => row.Sözcük?.toLowerCase().includes(query)) ||
-                              data.find(row => row['Eş Anlamlılar']?.toLowerCase()
-                                .split(',')
-                                .map(x => x.trim())
-                                .includes(query));
-
-              if (bestMatch) {
-                selectedWord = bestMatch; // Yeni kelime seçildi
-                showResult(bestMatch);
-              } else {
-                resultDiv.innerHTML = '<p>Aradığınız kelime bulunamadı.</p>';
-              }
-            }
-          });
-
         } catch (error) {
           console.error('Veri çekme hatası:', error);
-          document.getElementById('result').innerHTML = '<p>Veriler yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
         }
       }
 
@@ -144,18 +119,11 @@
         background-color: #e0e0e0;
       }
 
-      #searchWrapper {
-        margin-bottom: 120px; /* Öneriler için boşluk */
-      }
-
+      /* Öneri kısmının boyutunu sabitle */
       #suggestions {
-        max-height: 160px;
-        overflow-y: auto;
+        max-height: 200px; /* Sabit yükseklik */
+        overflow-y: auto; /* Kaydırma çubuğu ekle */
         margin-top: 10px;
-      }
-
-      #result {
-        margin-top: 20px;
       }
     </style>
 </body>
