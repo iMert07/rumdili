@@ -34,22 +34,26 @@
               return;
             }
 
-            // Arama yaparken kısmi eşleşme
+            // Kısmi eşleşme yapan kelimeleri buluyoruz
             const matches = data.filter(row => {
               const wordMatch = row.Sözcük?.toLowerCase().includes(query); // Sözcükte kısmi eşleşme
               const synonymsMatch = row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).some(syn => syn.includes(query)); // Eş anlamlılarda kısmi eşleşme
-
               return wordMatch || synonymsMatch;
             });
 
+            // Eşleşen kelimeler alfabetik sıraya göre sıralanır
+            matches.sort((a, b) => a.Sözcük.localeCompare(b.Sözcük));
+
+            // En yakın eşleşme: İlk sıradaki öğeyi gösteriyoruz
             if (matches.length > 0) {
-              resultDiv.innerHTML = matches.map(match => `
+              const bestMatch = matches[0]; // İlk eşleşmeyi alıyoruz
+              resultDiv.innerHTML = `
                 <div>
-                  <strong>${match.Sözcük}</strong><br>
-                  <span style="color: gray;">(${match['Eş Anlamlılar']})</span><br>
-                  <p>${match.Açıklama || ''}</p>
+                  <strong>${bestMatch.Sözcük}</strong><br>
+                  <span style="color: gray;">(${bestMatch['Eş Anlamlılar']})</span><br>
+                  <p>${bestMatch.Açıklama || ''}</p>
                 </div>
-              `).join('');
+              `;
             } else {
               resultDiv.innerHTML = `<p>Kelime bulunamadı.</p>`;
             }
