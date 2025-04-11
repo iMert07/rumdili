@@ -28,84 +28,105 @@
 
           const searchInput = document.getElementById('searchInput');
           const resultDiv = document.getElementById('result');
-          const suggestionsDiv = document.getElementById('suggestions'); // Öneri alanı
+          const suggestionsDiv = document.getElementById('suggestions');
 
-          let selectedWord = null; // Seçilen kelimeyi tutacak
-          let lastSearchQuery = ''; // Son arama sorgusunu tutacak
-          let isResultSelected = false; // Sonuç seçilip seçilmediğini kontrol etmek için
+          let selectedWord = null; // Şu an gösterilen kelime
 
-          // Her harf girişiyle anında arama
-          searchInput.addEventListener('input', () => {
-            const query = searchInput.value.trim().toLowerCase();
+          // Başlangıçta ekran boş
+          showResult(null);
+          suggestionsDiv.innerHTML = '';
 
-            if (query === '') {
-              // Eğer arama kutusu boşsa, önerileri temizle ve sonuçları boşalt
-              suggestionsDiv.innerHTML = '';
-              showResult(null); // Sonuçları temizle
-              isResultSelected = false; // Sonuç seçilmedi
-              return;
-            }
+          // Öneri listesini güncelleyen fonksiyon
+          function updateSuggestions(query) {
+            suggestionsDiv.innerHTML = '';
+            if (query === '') return;
 
-            if (query !== lastSearchQuery) {
-              // Sadece yeni arama yapıldığında sonuçları güncelle
-              lastSearchQuery = query;
-              showResult(null); // Sonuç ekranını boşalt
-              isResultSelected = false; // Sonuç seçilmedi
-            }
-
-            // Kısmi eşleşme yapan kelimeleri buluyoruz
+            // Kısmi eşleşme yapan kelimeleri bul
             const matches = data.filter(row => {
-              const wordMatch = row.Sözcük?.toLowerCase().includes(query); // Sözcükte kısmi eşleşme
-              const synonymsMatch = row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).some(syn => syn.includes(query)); // Eş anlamlılarda kısmi eşleşme
+              const wordMatch = row.Sözcük?.toLowerCase().includes(query);
+              const synonymsMatch = row['Eş Anlamlılar']?.toLowerCase()
+                .split(',')
+                .map(x => x.trim())
+                .some(syn => syn.includes(query));
               return wordMatch || synonymsMatch;
             });
 
-            // Öneri listesini oluşturuyoruz
-            suggestionsDiv.innerHTML = '';
+            // Önerileri sırala (kısa kelimeler önce)
+            const sortedMatches = matches.sort((a, b) => {
+              const lengthDifference = a.Sözcük.length - b.Sözcük.length;
+              if (lengthDifference !== 0) return lengthDifference;
+              return a.Sözcük.localeCompare(b.Sözcük);
+            });
 
-            // En hızlı eşleşen kelimeleri önce göster
-            const sortedMatches = matches
-              .sort((a, b) => {
-                // Kısa kelimeler önce sıralansın
-                const lengthDifference = a.Sözcük.length - b.Sözcük.length;
-                if (lengthDifference !== 0) return lengthDifference;
-
-                // Uzun kelimeler eşit uzunluktaysa, alfabetik sıralama yapılır
-                return a.Sözcük.localeCompare(b.Sözcük);
-              });
-
-            // Sadece 6 öneri gösterecek
+            // İlk 6 öneriyi göster
             const topMatches = sortedMatches.slice(0, 6);
-
             topMatches.forEach(match => {
               const suggestion = document.createElement('div');
               suggestion.textContent = match.Sözcük;
               suggestion.classList.add('suggestion');
               suggestion.addEventListener('click', () => {
-                selectedWord = match; // Seçilen kelimeyi kaydet
+                selectedWord = match; // Yeni kelime seçildi
                 showResult(match); // Sonucu güncelle
-                isResultSelected = true; // Sonuç seçildi
+                suggestionsDiv.innerHTML = ''; // Önerileri temizle
+                searchInput.value = match.Sözcük; // Arama çubuğunu güncelle
               });
               suggestionsDiv.appendChild(suggestion);
             });
-          });
+          }
 
-          // Sonuçları göster
+          // Sonuç ekranını güncelleyen fonksiyon
           function showResult(word) {
             if (word) {
               resultDiv.innerHTML = `
                 <div>
                   <strong>${word.Sözcük}</strong><br>
-                  <span style="color: gray;">(${word['Eş Anlamlılar']})</span><br>
+                  <span style="color: gray;">(${word['Eş Anlamlılar'] || ''})</span><br>
                   <p>${word.Açıklama || ''}</p>
                 </div>
               `;
             } else {
-              resultDiv.innerHTML = ''; // Başlangıçta boş olacak
+              resultDiv.innerHTML = ''; // Boş ekran
             }
           }
+
+          // Arama çubuğuna her yazıldığında öneriler güncellenir
+          searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            updateSuggestions(query);
+          });
+
+          // Enter tuşuyla arama
+          searchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+              const query = searchInput.value.trim().toLowerCase();
+              suggestionsDiv.innerHTML = ''; // Önerileri temizle
+
+              if (query === '') {
+                selectedWord = null;
+                showResult(null);
+                return;
+              }
+
+              // En iyi eşleşmeyi bul
+              const bestMatch = data.find(row => row.Sözcük?.toLowerCase() === query) ||
+                              data.find(row => row.Sözcük?.toLowerCase().includes(query)) ||
+                              data.find(row => row['Eş Anlamlılar']?.toLowerCase()
+                                .split(',')
+                                .map(x => x.trim())
+                                .includes(query));
+
+              if (bestMatch) {
+                selectedWord = bestMatch; // Yeni kelime seçildi
+                showResult(bestMatch);
+              } else {
+                resultDiv.innerHTML = '<p>Aradığınız kelime bulunamadı.</p>';
+              }
+            }
+          });
+
         } catch (error) {
           console.error('Veri çekme hatası:', error);
+          document.getElementById('result').innerHTML = '<p>Veriler yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
         }
       }
 
@@ -123,19 +144,16 @@
         background-color: #e0e0e0;
       }
 
-      /* Arama çubuğunun altına boşluk ekledik */
       #searchWrapper {
-        margin-bottom: 120px; /* 6 öneri sığacak kadar boşluk bırakıldı */
+        margin-bottom: 120px; /* Öneriler için boşluk */
       }
 
-      /* Öneri kısmının boyutunu sabitle */
       #suggestions {
-        max-height: 160px; /* 6 öneri için sabit yükseklik */
-        overflow-y: auto;  /* Kaydırma çubuğu ekle */
+        max-height: 160px;
+        overflow-y: auto;
         margin-top: 10px;
       }
 
-      /* Sonuç kısmı önerilerin altında yer alacak */
       #result {
         margin-top: 20px;
       }
