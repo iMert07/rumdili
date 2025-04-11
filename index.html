@@ -48,7 +48,22 @@
 
             // Öneri listesini oluşturuyoruz
             suggestionsDiv.innerHTML = '';
-            matches.forEach(match => {
+
+            // En hızlı eşleşen kelimeleri önce göster
+            const sortedMatches = matches
+              .sort((a, b) => {
+                // Kısa kelimeler önce sıralansın
+                const lengthDifference = a.Sözcük.length - b.Sözcük.length;
+                if (lengthDifference !== 0) return lengthDifference;
+
+                // Uzun kelimeler eşit uzunluktaysa, alfabetik sıralama yapılır
+                return a.Sözcük.localeCompare(b.Sözcük);
+              });
+
+            // Sadece 6 öneri gösterecek
+            const topMatches = sortedMatches.slice(0, 6);
+
+            topMatches.forEach(match => {
               const suggestion = document.createElement('div');
               suggestion.textContent = match.Sözcük;
               suggestion.classList.add('suggestion');
@@ -60,8 +75,8 @@
             });
 
             // Eğer kelime seçilmediyse, sadece önerileri göster
-            if (!selectedWord && matches.length > 0) {
-              showResult(matches[0]); // İlk öneriyi göster
+            if (!selectedWord && topMatches.length > 0) {
+              showResult(topMatches[0]); // İlk öneriyi göster
             }
           });
 
