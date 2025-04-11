@@ -10,7 +10,7 @@
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
-        line-height: 1.6;
+        line-height: 1.5;
       }
       .container {
         margin-top: 20px;
@@ -23,64 +23,60 @@
         border: 1px solid #ddd;
         border-radius: 4px;
         text-transform: uppercase;
+        margin-bottom: 15px;
       }
       .suggestion {
-        padding: 12px;
+        padding: 10px 12px;
         background-color: #f8f9fa;
-        margin: 6px 0;
+        margin: 5px 0;
         cursor: pointer;
         border-radius: 4px;
-        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
         text-transform: uppercase;
       }
       .suggestion:hover {
         background-color: #e9ecef;
       }
-      .original-word {
+      .main-word {
         font-weight: bold;
       }
-      .matched-synonym {
-        color: #777;
+      .synonym-hint {
+        color: #888;
         margin-left: 8px;
+        font-size: 0.95em;
       }
       #suggestions-container {
-        min-height: 240px;
+        min-height: 220px;
       }
       #suggestions {
         max-height: 300px;
         overflow-y: auto;
-        margin: 15px 0;
-        border: 1px solid #ddd;
+        margin: 10px 0;
+        border: 1px solid #eee;
         border-radius: 4px;
       }
       #result {
-        margin-top: 25px;
+        margin-top: 20px;
         padding: 20px;
         background-color: #f8f9fa;
         border-radius: 4px;
         text-transform: uppercase;
-        min-height: 200px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
       }
       .word-title {
-        font-size: 26px;
+        font-size: 24px;
         font-weight: bold;
-        margin: 0 0 10px 0;
-        align-self: flex-start;
+        margin-bottom: 10px;
       }
-      .synonyms {
-        font-size: 20px;
+      .synonyms-list {
+        font-size: 18px;
+        color: #666;
         margin: 10px 0;
-        color: #555;
-        align-self: center;
       }
       .description {
-        font-size: 18px;
-        margin: 10px 0 0 0;
-        line-height: 1.6;
-        align-self: flex-end;
+        font-size: 16px;
+        line-height: 1.5;
+        margin-top: 15px;
       }
     </style>
 </head>
@@ -140,10 +136,9 @@
           }
 
           const matches = allWords.filter(row => {
-            const wordMatch = toTurkishUpperCase(row.Sözcük || '').includes(query);
-            const synonyms = row['Eş Anlamlılar'] ? toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-            const synonymsMatch = synonyms.some(syn => syn.includes(query));
-            return wordMatch || synonymsMatch;
+            const word = toTurkishUpperCase(row.Sözcük || '');
+            // SADECE BAŞLANGICA GÖRE ARAMA
+            return word.startsWith(query);
           });
 
           displaySuggestions(matches, query);
@@ -163,40 +158,20 @@
         const suggestionsDiv = document.getElementById('suggestions');
         suggestionsDiv.innerHTML = '';
 
-        const sortedMatches = matches.sort((a, b) => {
-          return toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük));
-        });
-
-        const topMatches = sortedMatches.slice(0, 6);
-
-        if (topMatches.length === 0) {
-          suggestionsDiv.innerHTML = '<DIV CLASS="SUGGESTION">SONUÇ BULUNAMADI</DIV>';
+        if (matches.length === 0) {
+          suggestionsDiv.innerHTML = '<div class="suggestion">SONUÇ BULUNAMADI</div>';
           return;
         }
 
-        topMatches.forEach(match => {
-          const suggestion = document.createElement('div');
-          suggestion.classList.add('suggestion');
-          
-          const word = toTurkishUpperCase(match.Sözcük);
-          const synonyms = match['Eş Anlamlılar'] ? 
-                         toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-          
-          // Eş anlamlılardan hangisinin eşleştiğini bul
-          const matchedSynonym = synonyms.find(syn => syn.includes(query));
-
-          if (matchedSynonym && !word.includes(query)) {
-            suggestion.innerHTML = `
-              <span class="original-word">${word}</span>
-              <span class="matched-synonym">${matchedSynonym}</span>
-            `;
-          } else {
-            suggestion.innerHTML = `<span class="original-word">${word}</span>`;
-          }
-
-          suggestion.addEventListener('click', () => selectWord(match));
-          suggestionsDiv.appendChild(suggestion);
-        });
+        matches.sort((a, b) => toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük)))
+              .slice(0, 6)
+              .forEach(match => {
+                const suggestion = document.createElement('div');
+                suggestion.className = 'suggestion';
+                suggestion.innerHTML = `<span class="main-word">${toTurkishUpperCase(match.Sözcük)}</span>`;
+                suggestion.addEventListener('click', () => selectWord(match));
+                suggestionsDiv.appendChild(suggestion);
+              });
       }
 
       function selectWord(word) {
@@ -208,13 +183,10 @@
 
       function showResult(word) {
         const resultDiv = document.getElementById('result');
-        if (!word) return;
-
-        const synonyms = word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : '';
         resultDiv.innerHTML = `
-          <DIV CLASS="word-title">${toTurkishUpperCase(word.Sözcük)}</DIV>
-          <DIV CLASS="synonyms">${synonyms}</DIV>
-          <DIV CLASS="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</DIV>
+          <div class="word-title">${toTurkishUpperCase(word.Sözcük)}</div>
+          <div class="synonyms-list">${word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : ''}</div>
+          <div class="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</div>
         `;
       }
 
