@@ -33,10 +33,10 @@
               return;
             }
 
-            // Her harf girildiğinde anında arama yapacak şekilde
+            // Arama yapmak için filter fonksiyonunu kullanalım
             const matches = data.filter(row =>
-              row.Sözcük?.toLowerCase().includes(query) ||
-              row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).includes(query)
+              row.Sözcük?.toLowerCase().includes(query) || // Kısmi eşleşme
+              row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).includes(query) // Eş anlamlıları da kontrol et
             );
 
             if (matches.length > 0) {
