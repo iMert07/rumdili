@@ -10,6 +10,7 @@
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
+        text-transform: uppercase; /* Tüm metinleri büyük harf yapar */
       }
       .container {
         margin-top: 20px;
@@ -21,6 +22,7 @@
         box-sizing: border-box;
         border: 1px solid #ddd;
         border-radius: 4px;
+        text-transform: uppercase; /* Arama kutusundaki metin büyük harf */
       }
       .suggestion {
         padding: 10px;
@@ -34,10 +36,10 @@
         background-color: #e9ecef;
       }
       #suggestions-container {
-        min-height: 220px; /* 6 öneri için yeterli sabit yükseklik */
+        min-height: 220px;
       }
       #suggestions {
-        max-height: 220px; /* 6 öneri için sabit yükseklik */
+        max-height: 220px;
         overflow-y: auto;
         margin-top: 10px;
         border: 1px solid #ddd;
@@ -48,6 +50,10 @@
         padding: 15px;
         background-color: #f8f9fa;
         border-radius: 4px;
+      }
+      /* Özel durumlar için (eğer bazı elementler küçük harf olmasın istiyorsanız) */
+      .lowercase {
+        text-transform: none !important;
       }
     </style>
 </head>
@@ -75,9 +81,9 @@
           allWords = await response.json();
           setupSearch();
         } catch (error) {
-          console.error('Veri çekme hatası:', error);
+          console.error('VERİ ÇEKME HATASI:', error);
           document.getElementById('result').innerHTML = 
-            '<p style="color: red;">Veriler yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</p>';
+            '<P STYLE="COLOR: RED;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</P>';
         }
       }
 
@@ -88,7 +94,7 @@
 
         searchInput.addEventListener('input', handleInput);
         
-        // Enter tuşu ile ilk öneriyi seç
+        // ENTER TUŞU İLE İLK ÖNERİYİ SEÇ
         searchInput.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') {
             const firstSuggestion = suggestionsDiv.querySelector('.suggestion');
@@ -100,17 +106,17 @@
       }
 
       function handleInput() {
-        const query = this.value.trim().toLowerCase();
+        const query = this.value.trim().toUpperCase(); // BÜYÜK HARFE ÇEVİR
         const suggestionsDiv = document.getElementById('suggestions');
         
         if (!query) {
-          suggestionsDiv.innerHTML = ''; // Sadece önerileri temizle
+          suggestionsDiv.innerHTML = ''; // SADECE ÖNERİLERİ TEMİZLE
           return;
         }
 
         const matches = allWords.filter(row => {
-          const wordMatch = row.Sözcük?.toLowerCase().includes(query);
-          const synonyms = row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()) || [];
+          const wordMatch = row.Sözcük?.toUpperCase().includes(query);
+          const synonyms = row['Eş Anlamlılar']?.toUpperCase().split(',').map(x => x.trim()) || [];
           const synonymsMatch = synonyms.some(syn => syn.includes(query));
           return wordMatch || synonymsMatch;
         });
@@ -126,13 +132,13 @@
         const topMatches = sortedMatches.slice(0, 6);
 
         if (topMatches.length === 0) {
-          suggestionsDiv.innerHTML = '<div class="suggestion">Sonuç bulunamadı</div>';
+          suggestionsDiv.innerHTML = '<DIV CLASS="SUGGESTION">SONUÇ BULUNAMADI</DIV>';
           return;
         }
 
         topMatches.forEach(match => {
           const suggestion = document.createElement('div');
-          suggestion.textContent = match.Sözcük;
+          suggestion.textContent = match.Sözcük.toUpperCase(); // BÜYÜK HARF
           suggestion.classList.add('suggestion');
           suggestion.addEventListener('click', () => selectWord(match));
           suggestionsDiv.appendChild(suggestion);
@@ -140,8 +146,8 @@
       }
 
       function selectWord(word) {
-        lastSelectedWord = word; // Seçilen kelimeyi sakla
-        document.getElementById('searchInput').value = word.Sözcük;
+        lastSelectedWord = word; // SEÇİLEN KELİMEYİ SAKLA
+        document.getElementById('searchInput').value = word.Sözcük.toUpperCase(); // BÜYÜK HARF
         document.getElementById('suggestions').innerHTML = '';
         showResult(word);
       }
@@ -150,13 +156,13 @@
         const resultDiv = document.getElementById('result');
         if (!word) return;
 
-        const synonyms = word['Eş Anlamlılar'] ? word['Eş Anlamlılar'] : '';
+        const synonyms = word['Eş Anlamlılar'] ? word['Eş Anlamlılar'].toUpperCase() : '';
         resultDiv.innerHTML = `
-          <div>
-            <h2>${word.Sözcük}</h2>
-            ${synonyms ? `<p><em>Eş Anlamlılar: ${synonyms}</em></p>` : ''}
-            <p>${word.Açıklama || 'Açıklama bulunmamaktadır.'}</p>
-          </div>
+          <DIV>
+            <H2>${word.Sözcük.toUpperCase()}</H2>
+            ${synonyms ? `<P><EM>EŞ ANLAMLILAR: ${synonyms}</EM></P>` : ''}
+            <P>${word.Açıklama ? word.Açıklama.toUpperCase() : 'AÇIKLAMA BULUNMAMAKTADIR.'}</P>
+          </DIV>
         `;
       }
 
