@@ -10,7 +10,7 @@
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
-        text-transform: uppercase; /* Tüm metinleri büyük harf yapar */
+        text-transform: uppercase;
       }
       .container {
         margin-top: 20px;
@@ -22,7 +22,7 @@
         box-sizing: border-box;
         border: 1px solid #ddd;
         border-radius: 4px;
-        text-transform: uppercase; /* Arama kutusundaki metin büyük harf */
+        text-transform: uppercase;
       }
       .suggestion {
         padding: 10px;
@@ -51,10 +51,6 @@
         background-color: #f8f9fa;
         border-radius: 4px;
       }
-      /* Özel durumlar için (eğer bazı elementler küçük harf olmasın istiyorsanız) */
-      .lowercase {
-        text-transform: none !important;
-      }
     </style>
 </head>
 <body>
@@ -68,11 +64,11 @@
     </div>
 
     <script>
-      let allWords = []; // Tüm kelimeleri bellekte tut
-      let lastSelectedWord = null; // Son seçilen kelimeyi sakla
+      let allWords = [];
+      let lastSelectedWord = null;
 
       async function fetchWords() {
-        const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
+        const sheetId = '1R01AIajx6dzhlo-kbiuxumld2aevxjcqkutfgyb3edm';
         const sheetName = 'Sayfa1';
         const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
 
@@ -81,9 +77,9 @@
           allWords = await response.json();
           setupSearch();
         } catch (error) {
-          console.error('VERİ ÇEKME HATASI:', error);
+          console.error('VERI ÇEKME HATASI:', error);
           document.getElementById('result').innerHTML = 
-            '<P STYLE="COLOR: RED;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</P>';
+            '<P STYLE="COLOR: RED;">VERILER YÜKLENIRKEN HATA OLUSTU. LÜTFEN SAYFAYI YENILEYIN.</P>';
         }
       }
 
@@ -94,7 +90,6 @@
 
         searchInput.addEventListener('input', handleInput);
         
-        // ENTER TUŞU İLE İLK ÖNERİYİ SEÇ
         searchInput.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') {
             const firstSuggestion = suggestionsDiv.querySelector('.suggestion');
@@ -106,11 +101,11 @@
       }
 
       function handleInput() {
-        const query = this.value.trim().toUpperCase(); // BÜYÜK HARFE ÇEVİR
+        const query = this.value.trim().toUpperCase();
         const suggestionsDiv = document.getElementById('suggestions');
         
         if (!query) {
-          suggestionsDiv.innerHTML = ''; // SADECE ÖNERİLERİ TEMİZLE
+          suggestionsDiv.innerHTML = '';
           return;
         }
 
@@ -138,7 +133,7 @@
 
         topMatches.forEach(match => {
           const suggestion = document.createElement('div');
-          suggestion.textContent = match.Sözcük.toUpperCase(); // BÜYÜK HARF
+          suggestion.textContent = match.Sözcük.toUpperCase();
           suggestion.classList.add('suggestion');
           suggestion.addEventListener('click', () => selectWord(match));
           suggestionsDiv.appendChild(suggestion);
@@ -146,8 +141,8 @@
       }
 
       function selectWord(word) {
-        lastSelectedWord = word; // SEÇİLEN KELİMEYİ SAKLA
-        document.getElementById('searchInput').value = word.Sözcük.toUpperCase(); // BÜYÜK HARF
+        lastSelectedWord = word;
+        document.getElementById('searchInput').value = word.Sözcük.toUpperCase();
         document.getElementById('suggestions').innerHTML = '';
         showResult(word);
       }
@@ -160,7 +155,7 @@
         resultDiv.innerHTML = `
           <DIV>
             <H2>${word.Sözcük.toUpperCase()}</H2>
-            ${synonyms ? `<P><EM>EŞ ANLAMLILAR: ${synonyms}</EM></P>` : ''}
+            ${synonyms ? `<P>${synonyms}</P>` : ''}
             <P>${word.Açıklama ? word.Açıklama.toUpperCase() : 'AÇIKLAMA BULUNMAMAKTADIR.'}</P>
           </DIV>
         `;
