@@ -33,19 +33,20 @@
               return;
             }
 
-            const match = data.find(row =>
-              row.Sözcük?.toLowerCase() === query ||
+            // Her harf girildiğinde anında arama yapacak şekilde
+            const matches = data.filter(row =>
+              row.Sözcük?.toLowerCase().includes(query) ||
               row['Eş Anlamlılar']?.toLowerCase().split(',').map(x => x.trim()).includes(query)
             );
 
-            if (match) {
-              resultDiv.innerHTML = `
+            if (matches.length > 0) {
+              resultDiv.innerHTML = matches.map(match => `
                 <div>
                   <strong>${match.Sözcük}</strong><br>
                   <span style="color: gray;">(${match['Eş Anlamlılar']})</span><br>
                   <p>${match.Açıklama || ''}</p>
                 </div>
-              `;
+              `).join('');
             } else {
               resultDiv.innerHTML = `<p>Kelime bulunamadı.</p>`;
             }
