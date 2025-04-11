@@ -36,16 +36,14 @@
             const query = searchInput.value.trim().toLowerCase();
 
             if (query === '') {
-              // Eğer arama kutusu boşsa, önerileri temizle ve sonuç ekranını da temizle
+              // Eğer arama kutusu boşsa, sadece önerileri temizle
               suggestionsDiv.innerHTML = '';
-              showResult(null); // Sonuç ekranını temizle
               return;
             }
 
             if (query !== lastSearchQuery) {
-              // Eğer arama sorgusu değişirse, sonucu temizle
+              // Sadece yeni arama yapıldığında sonuçları güncelle
               lastSearchQuery = query;
-              showResult(null); // Sonuç ekranını boşalt
             }
 
             // Kısmi eşleşme yapan kelimeleri buluyoruz
