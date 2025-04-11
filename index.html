@@ -29,14 +29,21 @@
           const suggestionsDiv = document.getElementById('suggestions'); // Öneri alanı
 
           let selectedWord = null; // Seçilen kelimeyi tutacak
+          let lastSearchQuery = ''; // Son arama sorgusunu tutacak
 
           // Her harf girişiyle anında arama
           searchInput.addEventListener('input', () => {
             const query = searchInput.value.trim().toLowerCase();
-            if (!query) {
-              // Eğer arama kutusu boşsa, önerileri temizle fakat sonuçları bırak
+
+            if (query === '') {
+              // Eğer arama kutusu boşsa, sadece önerileri temizle
               suggestionsDiv.innerHTML = '';
-              return;
+            }
+
+            if (query !== lastSearchQuery) {
+              // Sadece yeni arama yapıldığında sonuçları güncelle
+              lastSearchQuery = query;
+              showResult(null); // Sonuç ekranını boşalt
             }
 
             // Kısmi eşleşme yapan kelimeleri buluyoruz
@@ -73,22 +80,21 @@
               });
               suggestionsDiv.appendChild(suggestion);
             });
-
-            // Eğer kelime seçilmediyse, sadece önerileri göster
-            if (!selectedWord && topMatches.length > 0) {
-              showResult(topMatches[0]); // İlk öneriyi göster
-            }
           });
 
           // Sonuçları göster
           function showResult(word) {
-            resultDiv.innerHTML = `
-              <div>
-                <strong>${word.Sözcük}</strong><br>
-                <span style="color: gray;">(${word['Eş Anlamlılar']})</span><br>
-                <p>${word.Açıklama || ''}</p>
-              </div>
-            `;
+            if (word) {
+              resultDiv.innerHTML = `
+                <div>
+                  <strong>${word.Sözcük}</strong><br>
+                  <span style="color: gray;">(${word['Eş Anlamlılar']})</span><br>
+                  <p>${word.Açıklama || ''}</p>
+                </div>
+              `;
+            } else {
+              resultDiv.innerHTML = `<p>Arama yapın...</p>`; // Başlangıçta sabit bir metin
+            }
           }
         } catch (error) {
           console.error('Veri çekme hatası:', error);
