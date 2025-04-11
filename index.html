@@ -68,7 +68,7 @@
       let lastSelectedWord = null;
 
       async function fetchWords() {
-        const sheetId = '1R01AIajx6dzhlo-kbiuxumld2aevxjcqkutfgyb3edm';
+        const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
         const sheetName = 'Sayfa1';
         const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
 
@@ -79,7 +79,7 @@
         } catch (error) {
           console.error('VERI ÇEKME HATASI:', error);
           document.getElementById('result').innerHTML = 
-            '<P STYLE="COLOR: RED;">VERILER YÜKLENIRKEN HATA OLUSTU. LÜTFEN SAYFAYI YENILEYIN.</P>';
+            '<P STYLE="COLOR: RED;">VERILER YUKLENIRKEN HATA OLUSTU. LUTFEN SAYFAYI YENILEYIN.</P>';
         }
       }
 
@@ -127,7 +127,7 @@
         const topMatches = sortedMatches.slice(0, 6);
 
         if (topMatches.length === 0) {
-          suggestionsDiv.innerHTML = '<DIV CLASS="SUGGESTION">SONUÇ BULUNAMADI</DIV>';
+          suggestionsDiv.innerHTML = '<DIV CLASS="SUGGESTION">SONUC BULUNAMADI</DIV>';
           return;
         }
 
@@ -156,7 +156,7 @@
           <DIV>
             <H2>${word.Sözcük.toUpperCase()}</H2>
             ${synonyms ? `<P>${synonyms}</P>` : ''}
-            <P>${word.Açıklama ? word.Açıklama.toUpperCase() : 'AÇIKLAMA BULUNMAMAKTADIR.'}</P>
+            <P>${word.Açıklama ? word.Açıklama.toUpperCase() : 'ACIKLAMA BULUNMAMAKTADIR.'}</P>
           </DIV>
         `;
       }
