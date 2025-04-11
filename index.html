@@ -10,7 +10,8 @@
     <div class="container">
         <h1>Yapay Dil Sözlüğü</h1>
         <input type="text" id="searchInput" placeholder="Kelime ara...">
-        <div id="result"></div>
+        <div id="suggestions"></div> <!-- Öneri Listesi -->
+        <div id="result"></div> <!-- Sonuç Ekranı -->
     </div>
 
     <script>
@@ -25,12 +26,16 @@
 
           const searchInput = document.getElementById('searchInput');
           const resultDiv = document.getElementById('result');
+          const suggestionsDiv = document.getElementById('suggestions'); // Öneri alanı
+
+          let selectedWord = null; // Seçilen kelimeyi tutacak
 
           // Her harf girişiyle anında arama
           searchInput.addEventListener('input', () => {
             const query = searchInput.value.trim().toLowerCase();
             if (!query) {
-              resultDiv.innerHTML = '';
+              resultDiv.innerHTML = ''; // Sonuçları temizle
+              suggestionsDiv.innerHTML = ''; // Önerileri temizle
               return;
             }
 
@@ -41,21 +46,35 @@
               return wordMatch || synonymsMatch;
             });
 
-            // Eğer eşleşme varsa, ilk sıradaki eşleşmeyi alıyoruz
-            if (matches.length > 0) {
-              // Sadece en yakın eşleşmeyi göster
-              const bestMatch = matches[0]; // İlk eşleşme
-              resultDiv.innerHTML = `
-                <div>
-                  <strong>${bestMatch.Sözcük}</strong><br>
-                  <span style="color: gray;">(${bestMatch['Eş Anlamlılar']})</span><br>
-                  <p>${bestMatch.Açıklama || ''}</p>
-                </div>
-              `;
-            } else {
-              resultDiv.innerHTML = `<p>Kelime bulunamadı.</p>`;
+            // Öneri listesini oluşturuyoruz
+            suggestionsDiv.innerHTML = '';
+            matches.forEach(match => {
+              const suggestion = document.createElement('div');
+              suggestion.textContent = match.Sözcük;
+              suggestion.classList.add('suggestion');
+              suggestion.addEventListener('click', () => {
+                selectedWord = match; // Seçilen kelimeyi kaydet
+                showResult(match); // Sonucu güncelle
+              });
+              suggestionsDiv.appendChild(suggestion);
+            });
+
+            // Eğer kelime seçilmediyse, sadece önerileri göster
+            if (!selectedWord && matches.length > 0) {
+              showResult(matches[0]); // İlk öneriyi göster
             }
           });
+
+          // Sonuçları göster
+          function showResult(word) {
+            resultDiv.innerHTML = `
+              <div>
+                <strong>${word.Sözcük}</strong><br>
+                <span style="color: gray;">(${word['Eş Anlamlılar']})</span><br>
+                <p>${word.Açıklama || ''}</p>
+              </div>
+            `;
+          }
         } catch (error) {
           console.error('Veri çekme hatası:', error);
         }
@@ -63,5 +82,17 @@
 
       window.onload = fetchWords;
     </script>
+
+    <style>
+      .suggestion {
+        padding: 8px;
+        background-color: #f0f0f0;
+        margin: 4px 0;
+        cursor: pointer;
+      }
+      .suggestion:hover {
+        background-color: #e0e0e0;
+      }
+    </style>
 </body>
 </html>
