@@ -32,6 +32,7 @@
 
           let selectedWord = null; // Seçilen kelimeyi tutacak
           let lastSearchQuery = ''; // Son arama sorgusunu tutacak
+          let isResultSelected = false; // Sonuç seçilip seçilmediğini kontrol etmek için
 
           // Her harf girişiyle anında arama
           searchInput.addEventListener('input', () => {
@@ -41,6 +42,7 @@
               // Eğer arama kutusu boşsa, önerileri temizle ve sonuçları boşalt
               suggestionsDiv.innerHTML = '';
               showResult(null); // Sonuçları temizle
+              isResultSelected = false; // Sonuç seçilmedi
               return;
             }
 
@@ -48,6 +50,7 @@
               // Sadece yeni arama yapıldığında sonuçları güncelle
               lastSearchQuery = query;
               showResult(null); // Sonuç ekranını boşalt
+              isResultSelected = false; // Sonuç seçilmedi
             }
 
             // Kısmi eşleşme yapan kelimeleri buluyoruz
@@ -81,6 +84,7 @@
               suggestion.addEventListener('click', () => {
                 selectedWord = match; // Seçilen kelimeyi kaydet
                 showResult(match); // Sonucu güncelle
+                isResultSelected = true; // Sonuç seçildi
               });
               suggestionsDiv.appendChild(suggestion);
             });
