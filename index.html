@@ -34,8 +34,8 @@
           searchInput.addEventListener('input', () => {
             const query = searchInput.value.trim().toLowerCase();
             if (!query) {
-              resultDiv.innerHTML = ''; // Sonuçları temizle
-              suggestionsDiv.innerHTML = ''; // Önerileri temizle
+              // Eğer arama kutusu boşsa, önerileri temizle fakat sonuçları bırak
+              suggestionsDiv.innerHTML = '';
               return;
             }
 
@@ -107,6 +107,13 @@
       }
       .suggestion:hover {
         background-color: #e0e0e0;
+      }
+
+      /* Öneri kısmının boyutunu sabitle */
+      #suggestions {
+        max-height: 200px; /* Sabit yükseklik */
+        overflow-y: auto; /* Kaydırma çubuğu ekle */
+        margin-top: 10px;
       }
     </style>
 </body>
