@@ -36,7 +36,7 @@
             const query = searchInput.value.trim().toLowerCase();
 
             if (query === '') {
-              // Arama kutusu boşsa, önerileri temizle
+              // Eğer arama kutusu boşsa, önerileri temizle
               suggestionsDiv.innerHTML = '';
               showResult(null); // Sonuç ekranını temizle
               return;
