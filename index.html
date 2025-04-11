@@ -135,26 +135,15 @@
             return;
           }
 
-          // 1. Önce asıl sözcüklerde başlangıca göre ara
-          const mainWordMatches = allWords.filter(row => {
-            const word = toTurkishUpperCase(row.Sözcük || '');
-            return word.startsWith(query);
-          });
-
-          // 2. Eş anlamlılarda tam eşleşme ara (başlangıç değil)
-          const synonymMatches = allWords.filter(row => {
+          const matches = allWords.filter(row => {
+            const wordMatch = toTurkishUpperCase(row.Sözcük || '').includes(query);
             const synonyms = row['Eş Anlamlılar'] ? 
                            toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-            return synonyms.some(syn => syn === query);
+            const synonymsMatch = synonyms.some(syn => syn.includes(query));
+            return wordMatch || synonymsMatch;
           });
 
-          // 3. Birleştir ve tekrarları kaldır
-          const allMatches = [...mainWordMatches, ...synonymMatches];
-          const uniqueMatches = allMatches.filter((item, index, self) =>
-            index === self.findIndex(t => t.Sözcük === item.Sözcük)
-          );
-
-          displaySuggestions(uniqueMatches, query);
+          displaySuggestions(matches, query);
         });
         
         searchInput.addEventListener('keydown', (e) => {
@@ -176,7 +165,6 @@
           return;
         }
 
-        // Asıl sözcük alfabetik sıra + eş anlamlılar
         matches.sort((a, b) => toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük)))
               .slice(0, 6)
               .forEach(match => {
@@ -187,13 +175,15 @@
                 const synonyms = match['Eş Anlamlılar'] ? 
                                toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
                 
-                // Eş anlamlı tam eşleşme varsa göster
-                const matchedSynonym = synonyms.find(syn => syn === query);
+                // Eş anlamlılardan eşleşeni bul (ama asıl sözcükte eşleşme yoksa)
+                const matchedSynonym = !word.includes(query) ? 
+                                     synonyms.find(syn => syn.includes(query)) : null;
 
-                suggestion.innerHTML = matchedSynonym ? 
-                  `<span class="main-word">${word}</span>` : 
-                  `<span class="main-word">${word}</span>`;
-                
+                suggestion.innerHTML = `
+                  <span class="main-word">${word}</span>
+                  ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
+                `;
+
                 suggestion.addEventListener('click', () => selectWord(match));
                 suggestionsDiv.appendChild(suggestion);
               });
