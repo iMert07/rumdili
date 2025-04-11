@@ -81,7 +81,7 @@
 
           // Sonuçları göster
           function showResult(word) {
-            if (word) {
+            if (word && selectedWord !== null) {
               resultDiv.innerHTML = `
                 <div>
                   <strong>${word.Sözcük}</strong><br>
