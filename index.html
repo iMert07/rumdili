@@ -10,7 +10,6 @@
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
-        text-transform: uppercase;
       }
       .container {
         margin-top: 20px;
@@ -31,6 +30,7 @@
         cursor: pointer;
         border-radius: 4px;
         transition: background-color 0.2s;
+        text-transform: uppercase;
       }
       .suggestion:hover {
         background-color: #e9ecef;
@@ -50,6 +50,17 @@
         padding: 15px;
         background-color: #f8f9fa;
         border-radius: 4px;
+        text-transform: uppercase;
+      }
+      .synonyms {
+        font-size: 16px;
+        margin: 8px 0;
+        color: #555;
+      }
+      .description {
+        font-size: 14px;
+        margin-top: 10px;
+        line-height: 1.4;
       }
     </style>
 </head>
@@ -64,6 +75,18 @@
     </div>
 
     <script>
+      // Türkçe karakter desteği ile büyük harfe çevirme fonksiyonu
+      function toTurkishUpperCase(text) {
+        return text.replace(/i/g, 'İ')
+                  .replace(/ı/g, 'I')
+                  .replace(/ğ/g, 'Ğ')
+                  .replace(/ü/g, 'Ü')
+                  .replace(/ş/g, 'Ş')
+                  .replace(/ö/g, 'Ö')
+                  .replace(/ç/g, 'Ç')
+                  .toUpperCase();
+      }
+
       let allWords = [];
       let lastSelectedWord = null;
 
@@ -101,7 +124,7 @@
       }
 
       function handleInput() {
-        const query = this.value.trim().toUpperCase();
+        const query = toTurkishUpperCase(this.value.trim());
         const suggestionsDiv = document.getElementById('suggestions');
         
         if (!query) {
@@ -110,8 +133,8 @@
         }
 
         const matches = allWords.filter(row => {
-          const wordMatch = row.Sözcük?.toUpperCase().includes(query);
-          const synonyms = row['Eş Anlamlılar']?.toUpperCase().split(',').map(x => x.trim()) || [];
+          const wordMatch = toTurkishUpperCase(row.Sözcük || '').includes(query);
+          const synonyms = toTurkishUpperCase(row['Eş Anlamlılar'] || '').split(',').map(x => x.trim());
           const synonymsMatch = synonyms.some(syn => syn.includes(query));
           return wordMatch || synonymsMatch;
         });
@@ -127,13 +150,13 @@
         const topMatches = sortedMatches.slice(0, 6);
 
         if (topMatches.length === 0) {
-          suggestionsDiv.innerHTML = '<DIV CLASS="SUGGESTION">SONUC BULUNAMADI</DIV>';
+          suggestionsDiv.innerHTML = '<DIV CLASS="SUGGESTION">SONUÇ BULUNAMADI</DIV>';
           return;
         }
 
         topMatches.forEach(match => {
           const suggestion = document.createElement('div');
-          suggestion.textContent = match.Sözcük.toUpperCase();
+          suggestion.textContent = toTurkishUpperCase(match.Sözcük);
           suggestion.classList.add('suggestion');
           suggestion.addEventListener('click', () => selectWord(match));
           suggestionsDiv.appendChild(suggestion);
@@ -142,7 +165,7 @@
 
       function selectWord(word) {
         lastSelectedWord = word;
-        document.getElementById('searchInput').value = word.Sözcük.toUpperCase();
+        document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
         document.getElementById('suggestions').innerHTML = '';
         showResult(word);
       }
@@ -151,12 +174,12 @@
         const resultDiv = document.getElementById('result');
         if (!word) return;
 
-        const synonyms = word['Eş Anlamlılar'] ? word['Eş Anlamlılar'].toUpperCase() : '';
+        const synonyms = word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : '';
         resultDiv.innerHTML = `
           <DIV>
-            <H2>${word.Sözcük.toUpperCase()}</H2>
-            ${synonyms ? `<P>${synonyms}</P>` : ''}
-            <P>${word.Açıklama ? word.Açıklama.toUpperCase() : 'AÇIKLAMA BULUNMAMAKTADIR.'}</P>
+            <H2>${toTurkishUpperCase(word.Sözcük)}</H2>
+            ${synonyms ? `<DIV CLASS="SYNONYMS">${synonyms}</DIV>` : ''}
+            <DIV CLASS="DESCRIPTION">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</DIV>
           </DIV>
         `;
       }
