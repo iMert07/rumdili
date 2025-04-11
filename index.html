@@ -69,6 +69,7 @@
               suggestion.textContent = match.Sözcük;
               suggestion.classList.add('suggestion');
               suggestion.addEventListener('click', () => {
+                if (selectedWord === match) return; // Aynı kelime tekrar seçilmesin
                 selectedWord = match; // Seçilen kelimeyi kaydet
                 showResult(match); // Sonucu güncelle
                 searchInput.value = match.Sözcük; // Arama kutusuna seçilen kelimeyi ekle
