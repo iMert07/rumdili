@@ -41,12 +41,10 @@
               return wordMatch || synonymsMatch;
             });
 
-            // Eşleşen kelimeler alfabetik sıraya göre sıralanır
-            matches.sort((a, b) => a.Sözcük.localeCompare(b.Sözcük));
-
-            // En yakın eşleşme: İlk sıradaki öğeyi gösteriyoruz
+            // Eğer eşleşme varsa, ilk sıradaki eşleşmeyi alıyoruz
             if (matches.length > 0) {
-              const bestMatch = matches[0]; // İlk eşleşmeyi alıyoruz
+              // Sadece en yakın eşleşmeyi göster
+              const bestMatch = matches[0]; // İlk eşleşme
               resultDiv.innerHTML = `
                 <div>
                   <strong>${bestMatch.Sözcük}</strong><br>
