@@ -51,16 +51,6 @@
         background-color: #f8f9fa;
         border-radius: 4px;
       }
-      .synonyms {
-        font-size: 16px;
-        margin: 8px 0;
-        color: #555;
-      }
-      .description {
-        font-size: 14px;
-        margin-top: 10px;
-        line-height: 1.4;
-      }
     </style>
 </head>
 <body>
@@ -87,9 +77,9 @@
           allWords = await response.json();
           setupSearch();
         } catch (error) {
-          console.error('VERI ÇEKME HATASI:', error);
+          console.error('VERİ ÇEKME HATASI:', error);
           document.getElementById('result').innerHTML = 
-            '<P STYLE="COLOR: RED;">VERILER YUKLENIRKEN HATA OLUSTU. LUTFEN SAYFAYI YENILEYIN.</P>';
+            '<P STYLE="COLOR: RED;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</P>';
         }
       }
 
@@ -165,8 +155,8 @@
         resultDiv.innerHTML = `
           <DIV>
             <H2>${word.Sözcük.toUpperCase()}</H2>
-            ${synonyms ? `<DIV CLASS="SYNONYMS">${synonyms}</DIV>` : ''}
-            <DIV CLASS="DESCRIPTION">${word.Açıklama ? word.Açıklama.toUpperCase() : 'ACIKLAMA BULUNMAMAKTADIR.'}</DIV>
+            ${synonyms ? `<P>${synonyms}</P>` : ''}
+            <P>${word.Açıklama ? word.Açıklama.toUpperCase() : 'AÇIKLAMA BULUNMAMAKTADIR.'}</P>
           </DIV>
         `;
       }
