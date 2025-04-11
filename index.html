@@ -10,7 +10,6 @@
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
-        line-height: 1.6;
       }
       .container {
         margin-top: 20px;
@@ -23,12 +22,11 @@
         border: 1px solid #ddd;
         border-radius: 4px;
         text-transform: uppercase;
-        margin-bottom: 15px;
       }
       .suggestion {
-        padding: 12px;
+        padding: 10px;
         background-color: #f8f9fa;
-        margin: 6px 0;
+        margin: 4px 0;
         cursor: pointer;
         border-radius: 4px;
         transition: background-color 0.2s;
@@ -38,38 +36,36 @@
         background-color: #e9ecef;
       }
       #suggestions-container {
-        min-height: 240px;
+        min-height: 220px;
       }
       #suggestions {
-        max-height: 300px;
+        max-height: 220px;
         overflow-y: auto;
-        margin: 15px 0;
+        margin-top: 10px;
         border: 1px solid #ddd;
         border-radius: 4px;
       }
       #result {
-        margin-top: 25px;
-        padding: 20px;
+        margin-top: 20px;
+        padding: 15px;
         background-color: #f8f9fa;
         border-radius: 4px;
         text-transform: uppercase;
       }
       .word-title {
-        font-size: 26px;
+        font-size: 24px;
         font-weight: bold;
-        margin: 20px 0 15px 0;
+        margin: 10px 0;
       }
       .synonyms {
-        font-size: 20px;
-        margin: 18px 0;
+        font-size: 18px;
+        margin: 10px 0;
         color: #555;
-        padding: 8px 0;
       }
       .description {
-        font-size: 18px;
-        margin: 20px 0;
-        line-height: 1.6;
-        padding: 10px 0;
+        font-size: 16px;
+        margin: 10px 0;
+        line-height: 1.4;
       }
     </style>
 </head>
@@ -84,7 +80,114 @@
     </div>
 
     <script>
-      // ... (Aynı JavaScript kodu, değişiklik yapılmadı) ...
+      function toTurkishUpperCase(text) {
+        if (!text) return '';
+        return text.replace(/i/g, 'İ')
+                  .replace(/ı/g, 'I')
+                  .replace(/ğ/g, 'Ğ')
+                  .replace(/ü/g, 'Ü')
+                  .replace(/ş/g, 'Ş')
+                  .replace(/ö/g, 'Ö')
+                  .replace(/ç/g, 'Ç')
+                  .toUpperCase();
+      }
+
+      let allWords = [];
+      let lastSelectedWord = null;
+
+      async function fetchWords() {
+        const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
+        const sheetName = 'Sayfa1';
+        const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+
+        try {
+          const response = await fetch(url);
+          allWords = await response.json();
+          setupSearch();
+        } catch (error) {
+          console.error('VERİ ÇEKME HATASI:', error);
+          document.getElementById('result').innerHTML = 
+            '<P STYLE="COLOR: RED;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</P>';
+        }
+      }
+
+      function setupSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const resultDiv = document.getElementById('result');
+        const suggestionsDiv = document.getElementById('suggestions');
+
+        searchInput.addEventListener('input', handleInput);
+        
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const firstSuggestion = suggestionsDiv.querySelector('.suggestion');
+            if (firstSuggestion) {
+              firstSuggestion.click();
+            }
+          }
+        });
+      }
+
+      function handleInput() {
+        const query = toTurkishUpperCase(this.value.trim());
+        const suggestionsDiv = document.getElementById('suggestions');
+        
+        if (!query) {
+          suggestionsDiv.innerHTML = '';
+          return;
+        }
+
+        const matches = allWords.filter(row => {
+          const wordMatch = toTurkishUpperCase(row.Sözcük || '').includes(query);
+          const synonyms = toTurkishUpperCase(row['Eş Anlamlılar'] || '').split(',').map(x => x.trim());
+          const synonymsMatch = synonyms.some(syn => syn.includes(query));
+          return wordMatch || synonymsMatch;
+        });
+
+        displaySuggestions(matches);
+      }
+
+      function displaySuggestions(matches) {
+        const suggestionsDiv = document.getElementById('suggestions');
+        suggestionsDiv.innerHTML = '';
+
+        const sortedMatches = matches.sort((a, b) => a.Sözcük.localeCompare(b.Sözcük));
+        const topMatches = sortedMatches.slice(0, 6);
+
+        if (topMatches.length === 0) {
+          suggestionsDiv.innerHTML = '<DIV CLASS="SUGGESTION">SONUÇ BULUNAMADI</DIV>';
+          return;
+        }
+
+        topMatches.forEach(match => {
+          const suggestion = document.createElement('div');
+          suggestion.textContent = toTurkishUpperCase(match.Sözcük);
+          suggestion.classList.add('suggestion');
+          suggestion.addEventListener('click', () => selectWord(match));
+          suggestionsDiv.appendChild(suggestion);
+        });
+      }
+
+      function selectWord(word) {
+        lastSelectedWord = word;
+        document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
+        document.getElementById('suggestions').innerHTML = '';
+        showResult(word);
+      }
+
+      function showResult(word) {
+        const resultDiv = document.getElementById('result');
+        if (!word) return;
+
+        const synonyms = word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : '';
+        resultDiv.innerHTML = `
+          <DIV CLASS="word-title">${toTurkishUpperCase(word.Sözcük)}</DIV>
+          <DIV CLASS="synonyms">${synonyms}</DIV>
+          <DIV CLASS="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</DIV>
+        `;
+      }
+
+      window.onload = fetchWords;
     </script>
 </body>
 </html>
