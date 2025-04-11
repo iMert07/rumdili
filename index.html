@@ -27,6 +27,7 @@
           const searchInput = document.getElementById('searchInput');
           const resultDiv = document.getElementById('result');
           const suggestionsDiv = document.getElementById('suggestions'); // Öneri alanı
+          const searchWrapper = document.getElementById('searchWrapper'); // Arama kutusunun bulunduğu alan
 
           let selectedWord = null; // Seçilen kelimeyi tutacak
           let lastSearchQuery = ''; // Son arama sorgusunu tutacak
@@ -116,8 +117,8 @@
       }
 
       /* Arama çubuğunun altına boşluk ekledik */
-      #searchInput {
-        margin-bottom: 20px; /* Arama çubuğunun altına 20px boşluk */
+      #searchWrapper {
+        margin-bottom: 100px; /* Burada 6 öneri sığacak kadar boşluk bırakıyoruz */
       }
 
       /* Öneri kısmının boyutunu sabitle */
