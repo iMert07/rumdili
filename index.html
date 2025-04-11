@@ -51,6 +51,16 @@
         background-color: #f8f9fa;
         border-radius: 4px;
       }
+      .synonyms {
+        font-size: 16px;
+        margin: 8px 0;
+        color: #555;
+      }
+      .description {
+        font-size: 14px;
+        margin-top: 10px;
+        line-height: 1.4;
+      }
     </style>
 </head>
 <body>
@@ -155,8 +165,8 @@
         resultDiv.innerHTML = `
           <DIV>
             <H2>${word.Sözcük.toUpperCase()}</H2>
-            ${synonyms ? `<P>${synonyms}</P>` : ''}
-            <P>${word.Açıklama ? word.Açıklama.toUpperCase() : 'AÇIKLAMA BULUNMAMAKTADIR.'}</P>
+            ${synonyms ? `<DIV CLASS="SYNONYMS">${synonyms}</DIV>` : ''}
+            <DIV CLASS="DESCRIPTION">${word.Açıklama ? word.Açıklama.toUpperCase() : 'ACIKLAMA BULUNMAMAKTADIR.'}</DIV>
           </DIV>
         `;
       }
