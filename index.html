@@ -80,11 +80,6 @@
       line-height: 1.5;
       margin-top: 15px;
     }
-    .etymology {
-      font-size: 16px;
-      color: #aaa;
-      margin-top: 15px;
-    }
 
     /* Mobil uyumu */
     @media (max-width: 768px) {
@@ -105,11 +100,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- Ana sayfa bağlantısını güncelledim -->
-    <a href="https://imert07.github.io/yapaydil/" style="text-decoration: none; color: black;">
-      <h1>RUM TILI</h1>
-    </a>
-    
+    <h1>RUM TILI</h1>
     <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
     <div id="suggestions-container">
       <div id="suggestions"></div>
@@ -210,8 +201,8 @@
 
           suggestion.innerHTML = ` 
             <span class="main-word">${word}</span>
-            ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}`
-          ;
+            ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
+          `;
 
           suggestion.addEventListener('click', () => selectWord(match));
           suggestionsDiv.appendChild(suggestion);
@@ -227,11 +218,10 @@
 
     function showResult(word) {
       const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = ` 
+      resultDiv.innerHTML = `
         <div class="word-title">${toTurkishUpperCase(word.Sözcük)}</div>
         <div class="synonyms-list">${word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : ''}</div>
         <div class="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</div>
-        <div class="etymology">${word['Kökenler'] ? toTurkishUpperCase(word['Kökenler']) : ''}</div>
       `;
     }
 
