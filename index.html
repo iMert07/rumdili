@@ -177,8 +177,8 @@
                                toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
                 
                 // Eş anlamlılardan eşleşeni bul (ama asıl sözcükte eşleşme yoksa)
-                const matchedSynonym = !word.includes(query) ? 
-                                     synonyms.find(syn => syn.includes(query)) : null;
+                const matchedSynonym = !word.startsWith(query) ? 
+                                     synonyms.find(syn => syn.startsWith(query)) : null;
 
                 suggestion.innerHTML = `
                   <span class="main-word">${word}</span>
