@@ -181,7 +181,7 @@
       searchInput.addEventListener('blur', () => {
         // Çubuğa odak kaybolduğunda önerileri kapat
         const suggestionsDiv = document.getElementById('suggestions');
-        setTimeout(() => suggestionsDiv.innerHTML = '', 200); // 200ms gecikmeli kapatma
+        setTimeout(() => suggestionsDiv.innerHTML = '', 100); // 100ms gecikmeli kapatma
       });
 
       searchInput.addEventListener('keydown', (e) => {
