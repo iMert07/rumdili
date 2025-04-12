@@ -175,6 +175,22 @@
           }
         }
       });
+
+      // Arama çubuğuna tıklayınca önerilerin tekrar açılmasını sağla
+      searchInput.addEventListener('focus', function() {
+        const query = toTurkishUpperCase(this.value.trim());
+        if (query) {
+          const matches = allWords.filter(row => {
+            const wordMatch = toTurkishUpperCase(row.Sözcük || '').startsWith(query);
+            const synonyms = row['Eş Anlamlılar'] ? 
+              toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
+            const synonymsMatch = synonyms.some(syn => syn.startsWith(query));
+            return wordMatch || synonymsMatch;
+          });
+
+          displaySuggestions(matches, query);
+        }
+      });
     }
 
     function displaySuggestions(matches, query) {
@@ -232,12 +248,6 @@
     }
 
     window.onload = fetchWords;
-
-    // Yeni düzenleme: Başlığa tıklayınca öneriler kapanacak
-    document.querySelector('h1').addEventListener('click', function() {
-      const suggestionsDiv = document.getElementById('suggestions');
-      suggestionsDiv.innerHTML = ''; // Başlığa tıklayınca öneriler silinsin
-    });
   </script>
 </body>
 </html>
