@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -159,7 +158,7 @@
 
         const matches = allWords.filter(row => {
           const wordMatch = toTurkishUpperCase(row.Sözcük || '').startsWith(query);
-          const synonyms = row['Eş Anlamlılar'] ?
+          const synonyms = row['Eş Anlamlılar'] ? 
             toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
           const synonymsMatch = synonyms.some(syn => syn.startsWith(query));
           return wordMatch || synonymsMatch;
@@ -194,10 +193,10 @@
           suggestion.className = 'suggestion';
 
           const word = toTurkishUpperCase(match.Sözcük);
-          const synonyms = match['Eş Anlamlılar'] ?
+          const synonyms = match['Eş Anlamlılar'] ? 
             toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
 
-          const matchedSynonym = !word.startsWith(query) ?
+          const matchedSynonym = !word.startsWith(query) ? 
             synonyms.find(syn => syn.startsWith(query)) : null;
 
           suggestion.innerHTML = `
@@ -233,6 +232,12 @@
     }
 
     window.onload = fetchWords;
+
+    // Yeni düzenleme: Başlığa tıklayınca öneriler kapanacak
+    document.querySelector('h1').addEventListener('click', function() {
+      const suggestionsDiv = document.getElementById('suggestions');
+      suggestionsDiv.innerHTML = ''; // Başlığa tıklayınca öneriler silinsin
+    });
   </script>
 </body>
 </html>
