@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -60,7 +61,7 @@
       border-radius: 4px;
     }
     #result {
-      margin-top: 15px; /* Sonuç ekranını önerilerin hemen üstüne kaydırdım */
+      margin-top: 36px;
       padding: 20px;
       background-color: #f8f9fa;
       border-radius: 4px;
@@ -191,7 +192,7 @@
       }
 
       matches.sort((a, b) => toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük)))
-        .slice(0, 12)  // 12 öneriye kadar göster
+        .slice(0, 6)
         .forEach(match => {
           const suggestion = document.createElement('div');
           suggestion.className = 'suggestion';
