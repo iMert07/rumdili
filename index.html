@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -76,9 +77,6 @@
       background-color: #f8f9fa;
       border-radius: 4px;
       text-transform: uppercase;
-      max-height: none;
-      height: auto; /* Height esnek olacak */
-      transition: height 0.3s ease-in-out;
     }
 
     .word-title {
@@ -127,6 +125,7 @@
 
     let allWords = [];
     let lastSelectedWord = null;
+    let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
 
     async function fetchWords() {
       const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
@@ -148,6 +147,9 @@
       const searchInput = document.getElementById('searchInput');
       const suggestionsDiv = document.getElementById('suggestions');
 
+      // Arama geçmişini öneri olarak göster
+      displaySearchHistory();
+
       searchInput.addEventListener('input', function () {
         const query = toTurkishUpperCase(this.value.trim());
 
@@ -156,6 +158,7 @@
           if (lastSelectedWord) {
             showResult(lastSelectedWord);
           }
+          displaySearchHistory(); // Geçmişi tekrar göster
           return;
         }
 
@@ -168,6 +171,18 @@
         });
 
         displaySuggestions(matches, query);
+      });
+
+      searchInput.addEventListener('focus', () => {
+        if (!searchInput.value.trim()) {
+          displaySearchHistory();
+        }
+      });
+
+      searchInput.addEventListener('blur', () => {
+        // Çubuğa odak kaybolduğunda önerileri kapat
+        const suggestionsDiv = document.getElementById('suggestions');
+        setTimeout(() => suggestionsDiv.innerHTML = '', 100); // 100ms gecikmeli kapatma
       });
 
       searchInput.addEventListener('keydown', (e) => {
@@ -217,6 +232,7 @@
       document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
       document.getElementById('suggestions').innerHTML = '';
       showResult(word);
+      updateSearchHistory(word.Sözcük);
     }
 
     function showResult(word) {
@@ -227,12 +243,45 @@
         <div class="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNAMAKTADIR.'}</div>
         <div class="etymology">${word.Öz ? toTurkishUpperCase(word.Öz) : ''}</div>
       `;
-      document.getElementById('result').style.height = 'auto'; // İçerik genişledikçe genişlesin
     }
 
     function clearResult() {
       document.getElementById('result').innerHTML = '';
       document.getElementById('searchInput').value = '';
+    }
+
+    function updateSearchHistory(query) {
+      if (!searchHistory.includes(query)) {
+        searchHistory.unshift(query); // Yeni aramayı başa ekle
+      }
+      if (searchHistory.length > 12) {
+        searchHistory.pop(); // 12'den fazla ise en eski aramayı sil
+      }
+      localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+      displaySearchHistory();
+    }
+
+    function displaySearchHistory() {
+      const suggestionsDiv = document.getElementById('suggestions');
+      suggestionsDiv.innerHTML = ''; // Geçmişi gösterirken yazı olmamalı
+
+      const searchInput = document.getElementById('searchInput');
+
+      if (searchInput === document.activeElement && !searchInput.value.trim()) {
+        searchHistory.slice(0, 12).forEach(history => {
+          const suggestion = document.createElement('div');
+          suggestion.className = 'suggestion';
+          suggestion.innerHTML = `<span class="main-word">${history}</span>`;
+          suggestion.addEventListener('click', () => {
+            searchInput.value = history;
+            const selectedWord = allWords.find(row => toTurkishUpperCase(row.Sözcük) === history);
+            if (selectedWord) {
+              showResult(selectedWord);
+            }
+          });
+          suggestionsDiv.appendChild(suggestion);
+        });
+      }
     }
 
     window.onload = fetchWords;
