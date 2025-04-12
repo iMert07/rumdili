@@ -130,11 +130,14 @@
         searchInput.addEventListener('input', function() {
           const query = toTurkishUpperCase(this.value.trim());
           
-          if (!query) {
-            suggestionsDiv.innerHTML = '';
-            document.getElementById('result').innerHTML = '';
-            return;
-          }
+         if (!query) {
+       suggestionsDiv.innerHTML = '';
+  // Arama boşsa, önceki seçilen sözcük varsa onu göstermeye devam et
+  if (lastSelectedWord) {
+    showResult(lastSelectedWord);
+  }
+  return;
+}
 
           const matches = allWords.filter(row => {
             const wordMatch = toTurkishUpperCase(row.Sözcük || '').includes(query);
