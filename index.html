@@ -124,6 +124,7 @@
 
     let allWords = [];
     let lastSelectedWord = null;
+    let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
 
     async function fetchWords() {
       const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
@@ -145,6 +146,9 @@
       const searchInput = document.getElementById('searchInput');
       const suggestionsDiv = document.getElementById('suggestions');
 
+      // Arama geçmişini öneri olarak göster
+      displaySearchHistory();
+
       searchInput.addEventListener('input', function () {
         const query = toTurkishUpperCase(this.value.trim());
 
@@ -153,6 +157,7 @@
           if (lastSelectedWord) {
             showResult(lastSelectedWord);
           }
+          displaySearchHistory(); // Geçmişi tekrar göster
           return;
         }
 
@@ -173,22 +178,6 @@
           if (firstSuggestion) {
             firstSuggestion.click();
           }
-        }
-      });
-
-      // Arama çubuğuna tıklayınca önerilerin tekrar açılmasını sağla
-      searchInput.addEventListener('focus', function() {
-        const query = toTurkishUpperCase(this.value.trim());
-        if (query) {
-          const matches = allWords.filter(row => {
-            const wordMatch = toTurkishUpperCase(row.Sözcük || '').startsWith(query);
-            const synonyms = row['Eş Anlamlılar'] ? 
-              toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-            const synonymsMatch = synonyms.some(syn => syn.startsWith(query));
-            return wordMatch || synonymsMatch;
-          });
-
-          displaySuggestions(matches, query);
         }
       });
     }
@@ -230,6 +219,7 @@
       document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
       document.getElementById('suggestions').innerHTML = '';
       showResult(word);
+      updateSearchHistory(word.Sözcük);
     }
 
     function showResult(word) {
@@ -245,6 +235,39 @@
     function clearResult() {
       document.getElementById('result').innerHTML = '';
       document.getElementById('searchInput').value = '';
+    }
+
+    function updateSearchHistory(query) {
+      if (!searchHistory.includes(query)) {
+        searchHistory.unshift(query); // Yeni aramayı başa ekle
+      }
+      if (searchHistory.length > 12) {
+        searchHistory.pop(); // 12'den fazla ise en eski aramayı sil
+      }
+      localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+      displaySearchHistory();
+    }
+
+    function displaySearchHistory() {
+      const suggestionsDiv = document.getElementById('suggestions');
+      const historyDiv = document.createElement('div');
+      historyDiv.className = 'suggestion';
+      historyDiv.innerHTML = `<span class="main-word">Arama Geçmişi</span>`;
+      suggestionsDiv.appendChild(historyDiv);
+
+      searchHistory.slice(0, 12).forEach(history => {
+        const suggestion = document.createElement('div');
+        suggestion.className = 'suggestion';
+        suggestion.innerHTML = `<span class="main-word">${history}</span>`;
+        suggestion.addEventListener('click', () => {
+          document.getElementById('searchInput').value = history;
+          const selectedWord = allWords.find(row => toTurkishUpperCase(row.Sözcük) === history);
+          if (selectedWord) {
+            showResult(selectedWord);
+          }
+        });
+        suggestionsDiv.appendChild(suggestion);
+      });
     }
 
     window.onload = fetchWords;
