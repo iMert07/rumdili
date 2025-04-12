@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -204,7 +205,9 @@
                                synonyms.find(syn => syn.startsWith(query)) : null;
 
           suggestion.innerHTML = ` 
-            <span class="main-word">${word}</span>
+            <a href="https://imert07.github.io/yapaydil/${word.toLowerCase()}">
+              <span class="main-word">${word}</span>
+            </a>
             ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
           `;
 
