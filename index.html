@@ -140,7 +140,7 @@
             const wordMatch = toTurkishUpperCase(row.Sözcük || '').includes(query);
             const synonyms = row['Eş Anlamlılar'] ? 
                            toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-            const synonymsMatch = synonyms.some(syn => syn.includes(query));
+            const synonymsMatch = synonyms.some(syn => syn.startsWith(query));
             return wordMatch || synonymsMatch;
           });
 
