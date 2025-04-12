@@ -101,7 +101,7 @@
 <body>
   <div class="container">
     <!-- Ana sayfaya yönlendiren başlık bağlantısı -->
-    <a href="https://imert07.github.io/yapay/dil/" style="text-decoration: none; color: black;">
+    <a href="https://imert07.github.io/yapaydil/" style="text-decoration: none; color: black;">
       <h1>RUM TILI</h1>
     </a>
     <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
@@ -215,7 +215,7 @@
     function selectWord(word) {
       lastSelectedWord = word;
       // URL'yi güncelle
-      const newUrl = `https://imert07.github.io/yapay/dil/${toTurkishUpperCase(word.Sözcük)}`;
+      const newUrl = `https://imert07.github.io/yapaydil/${toTurkishUpperCase(word.Sözcük)}`;
       history.pushState(null, '', newUrl); // URL'yi değiştir
       document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
       document.getElementById('suggestions').innerHTML = '';
