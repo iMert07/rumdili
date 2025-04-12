@@ -100,8 +100,8 @@
 </head>
 <body>
   <div class="container">
-    <!-- Başlığa bağlantı ekledim -->
-    <a href="#top" style="text-decoration: none; color: black;">
+    <!-- Ana sayfaya yönlendiren başlık bağlantısı -->
+    <a href="/" style="text-decoration: none; color: black;">
       <h1>RUM TILI</h1>
     </a>
     <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
@@ -214,6 +214,9 @@
 
     function selectWord(word) {
       lastSelectedWord = word;
+      // URL'yi güncelle
+      const newUrl = `/yapay/dil/${toTurkishUpperCase(word.Sözcük)}`;
+      history.pushState(null, '', newUrl); // URL'yi değiştir
       document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
       document.getElementById('suggestions').innerHTML = '';
       showResult(word);
