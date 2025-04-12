@@ -199,7 +199,7 @@
           const matchedSynonym = !word.startsWith(query) ? 
                                synonyms.find(syn => syn.startsWith(query)) : null;
 
-          suggestion.innerHTML = `
+          suggestion.innerHTML = ` 
             <span class="main-word">${word}</span>
             ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
           `;
