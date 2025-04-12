@@ -100,8 +100,8 @@
 </head>
 <body>
   <div class="container">
-    <!-- Başlığa bağlantı ekledim -->
-    <a href="#top" style="text-decoration: none; color: black;">
+    <!-- Başlığa tıklandığında ana sayfaya dönsün ve sonuç ekranını temizlesin -->
+    <a href="#" onclick="clearResult();" style="text-decoration: none; color: black;">
       <h1>RUM TILI</h1>
     </a>
     <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
@@ -226,6 +226,12 @@
         <div class="synonyms-list">${word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : ''}</div>
         <div class="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</div>
       `;
+    }
+
+    // Ana sayfaya dönme işlevi
+    function clearResult() {
+      document.getElementById('result').innerHTML = ''; // Sonuçları temizle
+      document.getElementById('searchInput').value = ''; // Arama çubuğunu temizle
     }
 
     window.onload = fetchWords;
