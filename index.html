@@ -60,7 +60,7 @@
       border-radius: 4px;
     }
     #result {
-      margin-top: 36px;
+      margin-top: 20px; /* Sonuç ekranı önerilerin hemen altında olacak */
       padding: 20px;
       background-color: #f8f9fa;
       border-radius: 4px;
@@ -191,7 +191,7 @@
       }
 
       matches.sort((a, b) => toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük)))
-        .slice(0, 6)
+        .slice(0, 12)  // 12 öneriye kadar göster
         .forEach(match => {
           const suggestion = document.createElement('div');
           suggestion.className = 'suggestion';
