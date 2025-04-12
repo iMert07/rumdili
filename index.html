@@ -100,10 +100,11 @@
 </head>
 <body>
   <div class="container">
-    <!-- Ana sayfaya yönlendiren başlık bağlantısı -->
+    <!-- Ana sayfa bağlantısını güncelledim -->
     <a href="https://imert07.github.io/yapaydil/" style="text-decoration: none; color: black;">
       <h1>RUM TILI</h1>
     </a>
+    
     <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
     <div id="suggestions-container">
       <div id="suggestions"></div>
@@ -203,7 +204,9 @@
                                synonyms.find(syn => syn.startsWith(query)) : null;
 
           suggestion.innerHTML = ` 
-            <span class="main-word">${word}</span>
+            <a href="https://imert07.github.io/yapaydil/${word.toLowerCase()}">
+              <span class="main-word">${word}</span>
+            </a>
             ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
           `;
 
@@ -214,9 +217,6 @@
 
     function selectWord(word) {
       lastSelectedWord = word;
-      // URL'yi güncelle
-      const newUrl = `https://imert07.github.io/yapaydil/${toTurkishUpperCase(word.Sözcük)}`;
-      history.pushState(null, '', newUrl); // URL'yi değiştir
       document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
       document.getElementById('suggestions').innerHTML = '';
       showResult(word);
