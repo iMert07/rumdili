@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -30,13 +31,13 @@
 
     .suggestion {
       height: 40px;
+      line-height: 40px;
       padding: 0 10px;
       background-color: #f8f9fa;
       margin: 4px 0;
       cursor: pointer;
       border-radius: 4px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
       text-transform: uppercase;
       font-size: 14px;
@@ -49,22 +50,24 @@
     }
 
     .main-word {
-      flex-grow: 1;
+      font-weight: bold;
     }
 
     .synonym-hint {
       color: #888;
+      margin-left: 8px;
       font-size: 0.95em;
-      white-space: nowrap;
     }
 
     #suggestions-container {
+      height: 264px; /* 6 x 40px height + margin boşlukları */
       overflow: hidden;
       margin-bottom: 24px;
     }
 
     #suggestions {
       overflow-y: auto;
+      max-height: 264px;
       border: 1px solid #eee;
       border-radius: 4px;
     }
@@ -205,14 +208,6 @@
           suggestion.addEventListener('click', () => selectWord(match));
           suggestionsDiv.appendChild(suggestion);
         });
-
-      setTimeout(() => {
-        const one = document.querySelector('.suggestion');
-        if (one) {
-          const h = one.offsetHeight + 8; // padding + margin
-          document.getElementById('suggestions-container').style.height = (h * 6) + 'px';
-        }
-      }, 10);
     }
 
     function selectWord(word) {
