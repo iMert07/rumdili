@@ -172,6 +172,12 @@
         displaySuggestions(matches, query);
       });
 
+      searchInput.addEventListener('focus', () => {
+        if (!searchInput.value.trim()) {
+          displaySearchHistory();
+        }
+      });
+
       searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           const firstSuggestion = suggestionsDiv.querySelector('.suggestion');
@@ -250,24 +256,23 @@
 
     function displaySearchHistory() {
       const suggestionsDiv = document.getElementById('suggestions');
-      const historyDiv = document.createElement('div');
-      historyDiv.className = 'suggestion';
-      historyDiv.innerHTML = `<span class="main-word">Arama Geçmişi</span>`;
-      suggestionsDiv.appendChild(historyDiv);
+      suggestionsDiv.innerHTML = ''; // Geçmişi gösterirken yazı olmamalı
 
-      searchHistory.slice(0, 12).forEach(history => {
-        const suggestion = document.createElement('div');
-        suggestion.className = 'suggestion';
-        suggestion.innerHTML = `<span class="main-word">${history}</span>`;
-        suggestion.addEventListener('click', () => {
-          document.getElementById('searchInput').value = history;
-          const selectedWord = allWords.find(row => toTurkishUpperCase(row.Sözcük) === history);
-          if (selectedWord) {
-            showResult(selectedWord);
-          }
+      if (!document.getElementById('searchInput').value.trim()) {
+        searchHistory.slice(0, 12).forEach(history => {
+          const suggestion = document.createElement('div');
+          suggestion.className = 'suggestion';
+          suggestion.innerHTML = `<span class="main-word">${history}</span>`;
+          suggestion.addEventListener('click', () => {
+            document.getElementById('searchInput').value = history;
+            const selectedWord = allWords.find(row => toTurkishUpperCase(row.Sözcük) === history);
+            if (selectedWord) {
+              showResult(selectedWord);
+            }
+          });
+          suggestionsDiv.appendChild(suggestion);
         });
-        suggestionsDiv.appendChild(suggestion);
-      });
+      }
     }
 
     window.onload = fetchWords;
