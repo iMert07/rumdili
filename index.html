@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -78,11 +79,6 @@
     .description {
       font-size: 16px;
       line-height: 1.5;
-      margin-top: 15px;
-    }
-    .etymology {
-      font-size: 16px;
-      color: #aaa;
       margin-top: 15px;
     }
 
@@ -212,8 +208,8 @@
             <a href="https://imert07.github.io/yapaydil/${word.toLowerCase()}">
               <span class="main-word">${word}</span>
             </a>
-            ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}`
-          ;
+            ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
+          `;
 
           suggestion.addEventListener('click', () => selectWord(match));
           suggestionsDiv.appendChild(suggestion);
@@ -229,11 +225,10 @@
 
     function showResult(word) {
       const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = ` 
+      resultDiv.innerHTML = `
         <div class="word-title">${toTurkishUpperCase(word.Sözcük)}</div>
         <div class="synonyms-list">${word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : ''}</div>
         <div class="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</div>
-        <div class="etymology">${word['Kökenler'] ? toTurkishUpperCase(word['Kökenler']) : ''}</div>
       `;
     }
 
