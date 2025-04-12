@@ -258,13 +258,15 @@
       const suggestionsDiv = document.getElementById('suggestions');
       suggestionsDiv.innerHTML = ''; // Geçmişi gösterirken yazı olmamalı
 
-      if (!document.getElementById('searchInput').value.trim()) {
+      const searchInput = document.getElementById('searchInput');
+
+      if (searchInput === document.activeElement && !searchInput.value.trim()) {
         searchHistory.slice(0, 12).forEach(history => {
           const suggestion = document.createElement('div');
           suggestion.className = 'suggestion';
           suggestion.innerHTML = `<span class="main-word">${history}</span>`;
           suggestion.addEventListener('click', () => {
-            document.getElementById('searchInput').value = history;
+            searchInput.value = history;
             const selectedWord = allWords.find(row => toTurkishUpperCase(row.Sözcük) === history);
             if (selectedWord) {
               showResult(selectedWord);
