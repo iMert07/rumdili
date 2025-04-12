@@ -187,7 +187,7 @@
       }
 
       matches.sort((a, b) => toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük)))
-        .slice(0, 6)
+        .slice(0, 12)  // Maksimum 12 öneri gösterilecek
         .forEach(match => {
           const suggestion = document.createElement('div');
           suggestion.className = 'suggestion';
