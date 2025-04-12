@@ -80,6 +80,12 @@
       line-height: 1.5;
       margin-top: 15px;
     }
+    .etymology {
+      font-size: 16px;
+      color: #666;
+      margin-top: 15px;
+      font-style: italic;
+    }
 
     /* Mobil uyumu */
     @media (max-width: 768px) {
@@ -225,6 +231,7 @@
         <div class="word-title">${toTurkishUpperCase(word.Sözcük)}</div>
         <div class="synonyms-list">${word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : ''}</div>
         <div class="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</div>
+        <div class="etymology">${word.Kökenler ? toTurkishUpperCase(word.Kökenler) : 'KÖKEN BULUNMAMAKTADIR.'}</div>
       `;
     }
 
