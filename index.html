@@ -1,215 +1,231 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RUM TILI</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        line-height: 1.5;
-      }
-      .container {
-        margin-top: 20px;
-      }
-      #searchInput {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        box-sizing: border-box;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        text-transform: uppercase;
-        margin-bottom: 15px;
-      }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RUM TILI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    .container {
+      margin-top: 20px;
+    }
+    #searchInput {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+    .suggestion {
+      padding: 6px 10px;
+      background-color: #f8f9fa;
+      margin: 4px 0;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      text-transform: uppercase;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+    .suggestion:hover {
+      background-color: #e9ecef;
+    }
+    .main-word {
+      font-weight: bold;
+    }
+    .synonym-hint {
+      color: #888;
+      margin-left: 8px;
+      font-size: 0.95em;
+    }
+    #suggestions-container {
+      min-height: 220px;
+    }
+    #suggestions {
+      max-height: 312px;
+      overflow-y: auto;
+      margin: 10px 0;
+      border: 1px solid #eee;
+      border-radius: 4px;
+    }
+    #result {
+      margin-top: 36px;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .word-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .synonyms-list {
+      font-size: 18px;
+      color: #666;
+      margin: 10px 0;
+    }
+    .description {
+      font-size: 16px;
+      line-height: 1.5;
+      margin-top: 15px;
+    }
+
+    /* Mobil uyumu */
+    @media (max-width: 768px) {
       .suggestion {
-        padding: 10px 12px;
-        background-color: #f8f9fa;
-        margin: 5px 0;
-        cursor: pointer;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        text-transform: uppercase;
+        padding: 5px 8px;
+        font-size: 13px;
       }
-      .suggestion:hover {
-        background-color: #e9ecef;
-      }
-      .main-word {
-        font-weight: bold;
-      }
-      .synonym-hint {
-        color: #888;
-        margin-left: 8px;
-        font-size: 0.95em;
-      }
-      #suggestions-container {
-        min-height: 220px;
-      }
+
       #suggestions {
-        max-height: 300px;
-        overflow-y: auto;
-        margin: 10px 0;
-        border: 1px solid #eee;
-        border-radius: 4px;
+        max-height: 270px;
       }
+
       #result {
-        margin-top: 20px;
-        padding: 20px;
-        background-color: #f8f9fa;
-        border-radius: 4px;
-        text-transform: uppercase;
+        margin-top: 30px;
       }
-      .word-title {
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-      .synonyms-list {
-        font-size: 18px;
-        color: #666;
-        margin: 10px 0;
-      }
-      .description {
-        font-size: 16px;
-        line-height: 1.5;
-        margin-top: 15px;
-      }
-    </style>
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>RUM TILI</h1>
-        <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
-        <div id="suggestions-container">
-            <div id="suggestions"></div>
-        </div>
-        <div id="result"></div>
+  <div class="container">
+    <h1>RUM TILI</h1>
+    <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
+    <div id="suggestions-container">
+      <div id="suggestions"></div>
     </div>
+    <div id="result"></div>
+  </div>
 
-    <script>
-      function toTurkishUpperCase(text) {
-        if (!text) return '';
-        return text.replace(/i/g, 'İ')
-                  .replace(/ı/g, 'I')
-                  .replace(/ğ/g, 'Ğ')
-                  .replace(/ü/g, 'Ü')
-                  .replace(/ş/g, 'Ş')
-                  .replace(/ö/g, 'Ö')
-                  .replace(/ç/g, 'Ç')
-                  .toUpperCase();
+  <script>
+    function toTurkishUpperCase(text) {
+      if (!text) return '';
+      return text.replace(/i/g, 'İ')
+                .replace(/ı/g, 'I')
+                .replace(/ğ/g, 'Ğ')
+                .replace(/ü/g, 'Ü')
+                .replace(/ş/g, 'Ş')
+                .replace(/ö/g, 'Ö')
+                .replace(/ç/g, 'Ç')
+                .toUpperCase();
+    }
+
+    let allWords = [];
+    let lastSelectedWord = null;
+
+    async function fetchWords() {
+      const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
+      const sheetName = 'Sayfa1';
+      const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+
+      try {
+        const response = await fetch(url);
+        allWords = await response.json();
+        setupSearch();
+      } catch (error) {
+        console.error('VERİ ÇEKME HATASI:', error);
+        document.getElementById('result').innerHTML = 
+          '<P STYLE="COLOR: RED;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</P>';
       }
+    }
 
-      let allWords = [];
-      let lastSelectedWord = null;
+    function setupSearch() {
+      const searchInput = document.getElementById('searchInput');
+      const suggestionsDiv = document.getElementById('suggestions');
 
-      async function fetchWords() {
-        const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
-        const sheetName = 'Sayfa1';
-        const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+      searchInput.addEventListener('input', function () {
+        const query = toTurkishUpperCase(this.value.trim());
 
-        try {
-          const response = await fetch(url);
-          allWords = await response.json();
-          setupSearch();
-        } catch (error) {
-          console.error('VERİ ÇEKME HATASI:', error);
-          document.getElementById('result').innerHTML = 
-            '<P STYLE="COLOR: RED;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</P>';
-        }
-      }
-
-      function setupSearch() {
-        const searchInput = document.getElementById('searchInput');
-        const suggestionsDiv = document.getElementById('suggestions');
-
-        searchInput.addEventListener('input', function() {
-          const query = toTurkishUpperCase(this.value.trim());
-          
-         if (!query) {
-       suggestionsDiv.innerHTML = '';
-  // Arama boşsa, önceki seçilen sözcük varsa onu göstermeye devam et
-  if (lastSelectedWord) {
-    showResult(lastSelectedWord);
-  }
-  return;
-}
-
-          const matches = allWords.filter(row => {
-            const wordMatch = toTurkishUpperCase(row.Sözcük || '').includes(query);
-            const synonyms = row['Eş Anlamlılar'] ? 
-                           toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-            const synonymsMatch = synonyms.some(syn => syn.startsWith(query));
-            return wordMatch || synonymsMatch;
-          });
-
-          displaySuggestions(matches, query);
-        });
-        
-        searchInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            const firstSuggestion = suggestionsDiv.querySelector('.suggestion');
-            if (firstSuggestion) {
-              firstSuggestion.click();
-            }
+        if (!query) {
+          suggestionsDiv.innerHTML = '';
+          // Önceki seçilen sözcük varsa onu göstermeye devam et
+          if (lastSelectedWord) {
+            showResult(lastSelectedWord);
           }
-        });
-      }
-
-      function displaySuggestions(matches, query) {
-        const suggestionsDiv = document.getElementById('suggestions');
-        suggestionsDiv.innerHTML = '';
-
-        if (matches.length === 0) {
-          suggestionsDiv.innerHTML = '<div class="suggestion">SONUÇ BULUNAMADI</div>';
           return;
         }
 
-        matches.sort((a, b) => toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük)))
-              .slice(0, 6)
-              .forEach(match => {
-                const suggestion = document.createElement('div');
-                suggestion.className = 'suggestion';
-                
-                const word = toTurkishUpperCase(match.Sözcük);
-                const synonyms = match['Eş Anlamlılar'] ? 
-                               toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
-                
-                // Eş anlamlılardan eşleşeni bul (ama asıl sözcükte eşleşme yoksa)
-                const matchedSynonym = !word.startsWith(query) ? 
-                                     synonyms.find(syn => syn.startsWith(query)) : null;
+        const matches = allWords.filter(row => {
+          const wordMatch = toTurkishUpperCase(row.Sözcük || '').startsWith(query);
+          const synonyms = row['Eş Anlamlılar'] ? 
+                         toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
+          const synonymsMatch = synonyms.some(syn => syn.startsWith(query));
+          return wordMatch || synonymsMatch;
+        });
 
-                suggestion.innerHTML = `
-                  <span class="main-word">${word}</span>
-                  ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
-                `;
+        displaySuggestions(matches, query);
+      });
 
-                suggestion.addEventListener('click', () => selectWord(match));
-                suggestionsDiv.appendChild(suggestion);
-              });
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const firstSuggestion = suggestionsDiv.querySelector('.suggestion');
+          if (firstSuggestion) {
+            firstSuggestion.click();
+          }
+        }
+      });
+    }
+
+    function displaySuggestions(matches, query) {
+      const suggestionsDiv = document.getElementById('suggestions');
+      suggestionsDiv.innerHTML = '';
+
+      if (matches.length === 0) {
+        suggestionsDiv.innerHTML = '<div class="suggestion">SONUÇ BULUNAMADI</div>';
+        return;
       }
 
-      function selectWord(word) {
-        lastSelectedWord = word;
-        document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
-        document.getElementById('suggestions').innerHTML = '';
-        showResult(word);
-      }
+      matches.sort((a, b) => toTurkishUpperCase(a.Sözcük).localeCompare(toTurkishUpperCase(b.Sözcük)))
+        .slice(0, 6)
+        .forEach(match => {
+          const suggestion = document.createElement('div');
+          suggestion.className = 'suggestion';
 
-      function showResult(word) {
-        const resultDiv = document.getElementById('result');
-        resultDiv.innerHTML = `
-          <div class="word-title">${toTurkishUpperCase(word.Sözcük)}</div>
-          <div class="synonyms-list">${word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : ''}</div>
-          <div class="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</div>
-        `;
-      }
+          const word = toTurkishUpperCase(match.Sözcük);
+          const synonyms = match['Eş Anlamlılar'] ? 
+                         toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
 
-      window.onload = fetchWords;
-    </script>
+          const matchedSynonym = !word.startsWith(query) ? 
+                               synonyms.find(syn => syn.startsWith(query)) : null;
+
+          suggestion.innerHTML = `
+            <span class="main-word">${word}</span>
+            ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
+          `;
+
+          suggestion.addEventListener('click', () => selectWord(match));
+          suggestionsDiv.appendChild(suggestion);
+        });
+    }
+
+    function selectWord(word) {
+      lastSelectedWord = word;
+      document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
+      document.getElementById('suggestions').innerHTML = '';
+      showResult(word);
+    }
+
+    function showResult(word) {
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = `
+        <div class="word-title">${toTurkishUpperCase(word.Sözcük)}</div>
+        <div class="synonyms-list">${word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : ''}</div>
+        <div class="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</div>
+      `;
+    }
+
+    window.onload = fetchWords;
+  </script>
 </body>
 </html>
