@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>RUM TILI</title>
   <style>
     body {
@@ -10,7 +10,6 @@
       max-width: 800px;
       margin: 0 auto;
       padding: 20px;
-      line-height: 1.5;
       font-size: 16px;
     }
 
@@ -30,7 +29,9 @@
     }
 
     .suggestion {
-      padding: 6px 10px;
+      height: 40px;
+      line-height: 40px;
+      padding: 0 10px;
       background-color: #f8f9fa;
       margin: 4px 0;
       cursor: pointer;
@@ -39,7 +40,8 @@
       align-items: center;
       text-transform: uppercase;
       font-size: 14px;
-      line-height: 1.2;
+      overflow: hidden;
+      white-space: nowrap;
     }
 
     .suggestion:hover {
@@ -57,13 +59,14 @@
     }
 
     #suggestions-container {
-      height: 156px; /* 6 öneri yüksekliği kadar sabitlendi */
+      height: 264px; /* 6 x 40px height + margin boşlukları */
+      overflow: hidden;
       margin-bottom: 24px;
     }
 
     #suggestions {
-      height: 100%;
       overflow-y: auto;
+      max-height: 264px;
       border: 1px solid #eee;
       border-radius: 4px;
     }
@@ -91,25 +94,6 @@
       font-size: 14px;
       color: #666;
       margin-top: 15px;
-    }
-
-    @media (max-width: 768px) {
-      .suggestion {
-        padding: 5px 8px;
-        font-size: 13px;
-      }
-
-      #suggestions-container {
-        height: 156px;
-      }
-
-      #suggestions {
-        height: 100%;
-      }
-
-      #result {
-        margin-top: 30px;
-      }
     }
   </style>
 </head>
@@ -152,8 +136,8 @@
         setupSearch();
       } catch (error) {
         console.error('VERİ ÇEKME HATASI:', error);
-        document.getElementById('result').innerHTML = 
-          '<P STYLE="COLOR: RED;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</P>';
+        document.getElementById('result').innerHTML =
+          '<p style="color: red;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</p>';
       }
     }
 
@@ -174,8 +158,8 @@
 
         const matches = allWords.filter(row => {
           const wordMatch = toTurkishUpperCase(row.Sözcük || '').startsWith(query);
-          const synonyms = row['Eş Anlamlılar'] ? 
-                         toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
+          const synonyms = row['Eş Anlamlılar'] ?
+            toTurkishUpperCase(row['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
           const synonymsMatch = synonyms.some(syn => syn.startsWith(query));
           return wordMatch || synonymsMatch;
         });
@@ -209,13 +193,13 @@
           suggestion.className = 'suggestion';
 
           const word = toTurkishUpperCase(match.Sözcük);
-          const synonyms = match['Eş Anlamlılar'] ? 
-                         toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
+          const synonyms = match['Eş Anlamlılar'] ?
+            toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim()) : [];
 
-          const matchedSynonym = !word.startsWith(query) ? 
-                               synonyms.find(syn => syn.startsWith(query)) : null;
+          const matchedSynonym = !word.startsWith(query) ?
+            synonyms.find(syn => syn.startsWith(query)) : null;
 
-          suggestion.innerHTML = ` 
+          suggestion.innerHTML = `
             <span class="main-word">${word}</span>
             ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
           `;
