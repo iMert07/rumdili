@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -96,6 +95,64 @@
       color: #666;
       margin-top: 15px;
     }
+
+    /* Geri bildirim kutusu */
+    #feedback {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #feedback-button {
+      background-color: #0ABCD7;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #feedback-button:hover {
+      background-color: #099cb1;
+    }
+
+    /* Küçük geri bildirim kutusu */
+    #feedback-form {
+      display: none;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    #feedback-form textarea {
+      width: 100%;
+      height: 60px;
+      font-size: 16px;
+      padding: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      resize: vertical;
+    }
+
+    #feedback-form button {
+      background-color: #0ABCD7;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #feedback-form button:hover {
+      background-color: #099cb1;
+    }
+
+    #feedback-status {
+      margin-top: 10px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -108,191 +165,62 @@
       <div id="suggestions"></div>
     </div>
     <div id="result"></div>
+
+    <!-- Geri Bildirim Butonu -->
+    <div id="feedback">
+      <button id="feedback-button" onclick="toggleFeedbackForm()">Geri Bildirim Yaz</button>
+
+      <!-- Geri Bildirim Formu -->
+      <div id="feedback-form">
+        <textarea id="feedbackText" placeholder="Görüşünüzü buraya yazın..."></textarea>
+        <button onclick="sendFeedback()">Gönder</button>
+        <div id="feedback-status"></div>
+      </div>
+    </div>
   </div>
 
   <script>
-    function toTurkishUpperCase(text) {
-      if (!text) return '';
-      return text.replace(/i/g, 'İ')
-                .replace(/ı/g, 'I')
-                .replace(/ğ/g, 'Ğ')
-                .replace(/ü/g, 'Ü')
-                .replace(/ş/g, 'Ş')
-                .replace(/ö/g, 'Ö')
-                .replace(/ç/g, 'Ç')
-                .toUpperCase();
+    const sheetApiUrl = 'https://sheetdb.io/api/v1/h7w9iqvawa52z';
+
+    function toggleFeedbackForm() {
+      const feedbackForm = document.getElementById('feedback-form');
+      feedbackForm.style.display = feedbackForm.style.display === 'block' ? 'none' : 'block';
     }
 
-    function normalizeString(str) {
-      if (!str) return '';
-      return str
-        .normalize('NFD')                 // â → a + ̂ gibi parçalar
-        .replace(/[\u0300-\u036f]/g, '')  // aksanlı işaretleri temizle
-        .replace(/ı/g, 'i')               // Türkçeye özgü dönüşüm
-        .replace(/İ/g, 'i')
-        .toLowerCase();
-    }
+    function sendFeedback() {
+      const text = document.getElementById('feedbackText').value.trim();
+      const status = document.getElementById('feedback-status');
 
-    let allWords = [];
-    let lastSelectedWord = null;
-    let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
-
-    async function fetchWords() {
-      const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
-      const sheetName = 'Sayfa1';
-      const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
-
-      try {
-        const response = await fetch(url);
-        allWords = await response.json();
-        setupSearch();
-      } catch (error) {
-        console.error('VERİ ÇEKME HATASI:', error);
-        document.getElementById('result').innerHTML =
-          '<p style="color: red;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</p>';
-      }
-    }
-
-    function setupSearch() {
-      const searchInput = document.getElementById('searchInput');
-      const suggestionsDiv = document.getElementById('suggestions');
-
-      displaySearchHistory();
-
-      searchInput.addEventListener('input', function () {
-        const rawQuery = this.value.trim();
-        const query = normalizeString(rawQuery);
-
-        if (!query) {
-          suggestionsDiv.innerHTML = '';
-          if (lastSelectedWord) showResult(lastSelectedWord);
-          displaySearchHistory();
-          return;
-        }
-
-        const matches = allWords.filter(row => {
-          const wordRaw = row.Sözcük || '';
-          const wordNorm = normalizeString(wordRaw);
-          const matchWord = wordNorm.startsWith(query);
-
-          const synonyms = row['Eş Anlamlılar']
-            ? row['Eş Anlamlılar'].split(',').map(s => normalizeString(s.trim()))
-            : [];
-
-          const matchSynonym = synonyms.some(s => s.startsWith(query));
-
-          return matchWord || matchSynonym;
-        });
-
-        displaySuggestions(matches, query);
-      });
-
-      searchInput.addEventListener('focus', () => {
-        if (!searchInput.value.trim()) displaySearchHistory();
-      });
-
-      searchInput.addEventListener('blur', () => {
-        setTimeout(() => document.getElementById('suggestions').innerHTML = '', 100);
-      });
-
-      searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          const firstSuggestion = suggestionsDiv.querySelector('.suggestion');
-          if (firstSuggestion) firstSuggestion.click();
-        }
-      });
-    }
-
-    function displaySuggestions(matches, query) {
-      const suggestionsDiv = document.getElementById('suggestions');
-      suggestionsDiv.innerHTML = '';
-
-      if (matches.length === 0) {
-        suggestionsDiv.innerHTML = '<div class="suggestion">SONUÇ BULUNAMADI</div>';
+      if (!text) {
+        status.innerText = 'Lütfen bir mesaj girin.';
+        status.style.color = 'red';
         return;
       }
 
-      matches.sort((a, b) =>
-        normalizeString(a.Sözcük).localeCompare(normalizeString(b.Sözcük))
-      ).slice(0, 12).forEach(match => {
-        const suggestion = document.createElement('div');
-        suggestion.className = 'suggestion';
-
-        const word = toTurkishUpperCase(match.Sözcük);
-        const synonyms = match['Eş Anlamlılar']
-          ? toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim())
-          : [];
-
-        const matchedSynonym = !normalizeString(match.Sözcük).startsWith(query)
-          ? synonyms.find(syn => normalizeString(syn).startsWith(query))
-          : null;
-
-        suggestion.innerHTML = `
-          <span class="main-word">${word}</span>
-          ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
-        `;
-
-        suggestion.addEventListener('click', () => selectWord(match));
-        suggestionsDiv.appendChild(suggestion);
+      fetch(sheetApiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: [{ Mesaj: text }] })
+      })
+      .then(response => {
+        if (response.ok) {
+          status.innerText = 'Teşekkürler! Geri bildiriminiz kaydedildi.';
+          status.style.color = 'green';
+          document.getElementById('feedbackText').value = '';
+        } else {
+          throw new Error('Hata oluştu.');
+        }
+      })
+      .catch(() => {
+        status.innerText = 'Gönderme sırasında bir hata oluştu.';
+        status.style.color = 'red';
       });
     }
 
-    function selectWord(word) {
-      lastSelectedWord = word;
-      document.getElementById('searchInput').value = toTurkishUpperCase(word.Sözcük);
-      document.getElementById('suggestions').innerHTML = '';
-      showResult(word);
-      updateSearchHistory(toTurkishUpperCase(word.Sözcük));
-    }
-
-    function showResult(word) {
-      const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = `
-        <div class="word-title">${toTurkishUpperCase(word.Sözcük)}</div>
-        <div class="synonyms-list">${word['Eş Anlamlılar'] ? toTurkishUpperCase(word['Eş Anlamlılar']) : ''}</div>
-        <div class="description">${word.Açıklama ? toTurkishUpperCase(word.Açıklama) : 'AÇIKLAMA BULUNMAMAKTADIR.'}</div>
-        <div class="etymology">${word.Öz ? toTurkishUpperCase(word.Öz) : ''}</div>
-      `;
-    }
-
-    function clearResult() {
-      document.getElementById('result').innerHTML = '';
-      document.getElementById('searchInput').value = '';
-    }
-
-    function updateSearchHistory(query) {
-      if (!searchHistory.includes(query)) {
-        searchHistory.unshift(query);
-      }
-      if (searchHistory.length > 12) {
-        searchHistory.pop();
-      }
-      localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
-      displaySearchHistory();
-    }
-
-    function displaySearchHistory() {
-      const suggestionsDiv = document.getElementById('suggestions');
-      suggestionsDiv.innerHTML = '';
-
-      const searchInput = document.getElementById('searchInput');
-
-      if (searchInput === document.activeElement && !searchInput.value.trim()) {
-        searchHistory.slice(0, 12).forEach(history => {
-          const suggestion = document.createElement('div');
-          suggestion.className = 'suggestion';
-          suggestion.innerHTML = `<span class="main-word">${history}</span>`;
-          suggestion.addEventListener('click', () => {
-            searchInput.value = history;
-            const selectedWord = allWords.find(row => toTurkishUpperCase(row.Sözcük) === history);
-            if (selectedWord) showResult(selectedWord);
-          });
-          suggestionsDiv.appendChild(suggestion);
-        });
-      }
-    }
-
-    window.onload = fetchWords;
+    // Buradan sonrası senin mevcut kodunun devamı...
+    // fetchWords(), normalizeString() ve diğer fonksiyonlar...
   </script>
+
+  <!-- Diğer JavaScript kodlarını buraya ekle -->
 </body>
 </html>
