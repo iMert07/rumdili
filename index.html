@@ -76,6 +76,9 @@
       background-color: #f8f9fa;
       border-radius: 4px;
       text-transform: uppercase;
+      text-align: center;
+      font-size: 20px;
+      color: #555;
     }
 
     .word-title {
@@ -106,7 +109,10 @@
     <div id="suggestions-container">
       <div id="suggestions"></div>
     </div>
-    <div id="result"></div>
+    <div id="result">
+      <div id="clock" style="font-weight: bold;"></div>
+      <div id="date"></div>
+    </div>
   </div>
 
   <script>
@@ -125,9 +131,9 @@
     function normalizeString(str) {
       if (!str) return '';
       return str
-        .normalize('NFD')                 // â → a + ̂ gibi parçalar
-        .replace(/[\u0300-\u036f]/g, '')  // aksanlı işaretleri temizle
-        .replace(/ı/g, 'i')               // Türkçeye özgü dönüşüm
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ı/g, 'i')
         .replace(/İ/g, 'i')
         .toLowerCase();
     }
@@ -165,6 +171,7 @@
         if (!query) {
           suggestionsDiv.innerHTML = '';
           if (lastSelectedWord) showResult(lastSelectedWord);
+          else showDateTime();
           displaySearchHistory();
           return;
         }
@@ -255,8 +262,9 @@
     }
 
     function clearResult() {
-      document.getElementById('result').innerHTML = '';
+      lastSelectedWord = null;
       document.getElementById('searchInput').value = '';
+      showDateTime();
     }
 
     function updateSearchHistory(query) {
@@ -291,7 +299,31 @@
       }
     }
 
-    window.onload = fetchWords;
+    function showDateTime() {
+      document.getElementById('result').innerHTML = `
+        <div id="clock" style="font-weight: bold;"></div>
+        <div id="date"></div>
+      `;
+      updateDateTime();
+    }
+
+    function updateDateTime() {
+      const now = new Date();
+
+      const pad = (n) => String(n).padStart(2, '0');
+
+      const timeStr = `${pad(now.getHours())}.${pad(now.getMinutes())}.${pad(now.getSeconds())}`;
+      const dateStr = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
+
+      document.getElementById('clock').textContent = timeStr;
+      document.getElementById('date').textContent = dateStr;
+    }
+
+    setInterval(updateDateTime, 1000);
+    window.onload = () => {
+      fetchWords();
+      updateDateTime();
+    };
   </script>
 </body>
 </html>
