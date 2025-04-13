@@ -95,43 +95,6 @@
       color: #666;
       margin-top: 15px;
     }
-
-    #feedbackForm {
-      display: none;
-      margin-top: 20px;
-      background-color: #f8f9fa;
-      padding: 20px;
-      border-radius: 4px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    #feedbackForm textarea {
-      width: 100%;
-      height: 100px;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-
-    #feedbackForm button {
-      padding: 10px 20px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    #feedbackForm button:hover {
-      background-color: #218838;
-    }
-
-    #feedbackToggle {
-      color: #007bff;
-      text-decoration: underline;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -144,18 +107,17 @@
       <div id="suggestions"></div>
     </div>
     <div id="result"></div>
-
-    <!-- Geri Bildirim Yazısına Tıklanarak Form Açılır -->
-    <p id="feedbackToggle">Geri Bildirim Yaz</p>
-
-    <!-- Geri Bildirim Formu -->
-    <div id="feedbackForm">
-      <textarea id="feedbackText" placeholder="Geri bildiriminizi buraya yazın..."></textarea>
-      <button onclick="submitFeedback()">Gönder</button>
+    
+    <!-- Geri Bildirim İçin Link -->
+    <p><a href="#" id="feedbackLink">Geri Bildirim Gönder</a></p>
+    <div id="feedbackForm" style="display:none;">
+      <textarea id="feedbackText" rows="4" cols="50" placeholder="Geri bildiriminizi buraya yazın..."></textarea><br>
+      <button onclick="sendFeedback()">Gönder</button>
     </div>
   </div>
 
   <script>
+    // Dönüşüm ve normalleştirme işlevleri
     function toTurkishUpperCase(text) {
       if (!text) return '';
       return text.replace(/i/g, 'İ')
@@ -184,7 +146,7 @@
 
     async function fetchWords() {
       const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
-      const sheetName = 'Sayfa1';
+      const sheetName = 'Sözlük'; // Güncellenmiş sekme adı
       const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
 
       try {
@@ -337,40 +299,39 @@
       }
     }
 
-    function toggleFeedbackForm() {
-      const feedbackForm = document.getElementById('feedbackForm');
-      feedbackForm.style.display = feedbackForm.style.display === 'block' ? 'none' : 'block';
-    }
+    // Geri Bildirim Gönderme Fonksiyonu
+    async function sendFeedback() {
+      const feedbackText = document.getElementById('feedbackText').value;
 
-    function submitFeedback() {
-      const feedbackText = document.getElementById('feedbackText').value.trim();
       if (!feedbackText) {
-        alert('Lütfen geri bildirim yazın.');
+        alert("Lütfen bir geri bildirim yazın.");
         return;
       }
 
-      // API'ye veri gönderme işlemi
-      fetch('https://sheetdb.io/api/v1/h7w9iqvawa52z', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ data: { geri_bildirim: feedbackText } })
-      })
-      .then(response => response.json())
-      .then(data => {
-        alert('Geri bildiriminiz başarıyla gönderildi!');
-        document.getElementById('feedbackForm').style.display = 'none';
+      const feedbackData = { feedback: feedbackText };
+      try {
+        const response = await fetch('https://sheetdb.io/api/v1/h7w9iqvawa52z', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify([feedbackData]),
+        });
+
+        const result = await response.json();
+        console.log(result); // API yanıtını konsolda gör
+
+        // Geri bildirim formunu sıfırlama
         document.getElementById('feedbackText').value = '';
-      })
-      .catch(error => {
-        console.error('Hata:', error);
-        alert('Geri bildiriminiz gönderilemedi. Lütfen tekrar deneyin.');
-      });
+        alert("Geri bildiriminiz gönderildi!");
+      } catch (error) {
+        console.error("Geri bildirim gönderme hatası:", error);
+        alert("Geri bildirim gönderilirken bir hata oluştu.");
+      }
     }
 
-    window.onload = fetchWords;
-    document.getElementById('feedbackToggle').addEventListener('click', toggleFeedbackForm);
+    window.onload = fetchWords; // Sayfa yüklendiğinde verileri çek
+
   </script>
 </body>
 </html>
