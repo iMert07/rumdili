@@ -184,7 +184,7 @@
 
     async function fetchWords() {
       const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
-      const sheetName = 'Sözlük';  // Düzeltilmiş sheet adı
+      const sheetName = 'Sözlük';  // Sheet adı 'Sözlük' olarak güncellenmiş
       const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
 
       try {
@@ -349,8 +349,8 @@
         return;
       }
 
-      // API'ye veri gönderme işlemi
-      fetch('https://sheetdb.io/api/v1/h7w9iqvawa52z', {
+      // Yeni API URL'yi kullanarak veri gönderme işlemi
+      fetch('https://sheetdb.io/api/v1/mt09gl0tun8di', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -369,8 +369,8 @@
       });
     }
 
-    window.onload = fetchWords;
-    document.getElementById('feedbackToggle').addEventListener('click', toggleFeedbackForm);
+    // Sayfa yüklendiğinde kelimeleri çek
+    fetchWords();
   </script>
 </body>
 </html>
