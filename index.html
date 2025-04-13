@@ -19,6 +19,11 @@
       align-items: center;
     }
 
+    .header a {
+      text-decoration: none;
+      color: black;
+    }
+
     .header h1 {
       margin: 0;
       font-size: 32px;
@@ -31,10 +36,6 @@
       font-size: 16px;
     }
 
-    .container {
-      margin-top: 20px;
-    }
-
     #searchInput {
       width: 100%;
       padding: 12px;
@@ -43,7 +44,7 @@
       border: 1px solid #ddd;
       border-radius: 4px;
       text-transform: uppercase;
-      margin-bottom: 15px;
+      margin: 20px 0;
     }
 
     .suggestion {
@@ -147,32 +148,118 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Üst başlık ve Geri Bildirim aynı hizada -->
-    <div class="header">
-      <a href="/" onclick="clearResult(); return false;" style="text-decoration: none; color: black;">
-        <h1>RUM TILI</h1>
-      </a>
-      <p id="feedbackToggle" onclick="toggleFeedbackForm()">Geri Bildirim</p>
-    </div>
-
-    <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
-    <div id="suggestions-container">
-      <div id="suggestions"></div>
-    </div>
-    <div id="result"></div>
-
-    <!-- Geri Bildirim Formu -->
-    <div id="feedbackForm">
-      <textarea id="feedbackText" placeholder="Geri bildiriminizi buraya yazın..."></textarea>
-      <button onclick="submitFeedback()">Gönder</button>
-    </div>
+  <div class="header">
+    <a href="#" onclick="clearResult(); return false;">
+      <h1>RUM TILI</h1>
+    </a>
+    <p id="feedbackToggle" onclick="toggleFeedbackForm()">Geri Bildirim</p>
   </div>
 
-  <!-- JS Kodu Aynen Kalsın -->
+  <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
+  <div id="suggestions-container">
+    <div id="suggestions"></div>
+  </div>
+  <div id="result"></div>
+
+  <div id="feedbackForm">
+    <textarea id="feedbackText" placeholder="Geri bildiriminizi buraya yazın..."></textarea>
+    <button onclick="submitFeedback()">Gönder</button>
+  </div>
+
   <script>
-    // JavaScript kodları burada (önceki sürümle aynı kalabilir)
-    // Sadece geri bildirim fonksiyonu lazım ise tekrar gönderirim.
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsContainer = document.getElementById('suggestions');
+    const resultContainer = document.getElementById('result');
+    const feedbackForm = document.getElementById('feedbackForm');
+
+    const kelimeler = [
+      { kelime: 'ADA', anlam: 'Denizle çevrili kara parçası', eş: ['CUVA'] },
+      { kelime: 'CUVA', anlam: 'Denizle çevrili kara parçası', eş: ['ADA'] },
+      { kelime: 'BAL', anlam: 'Arıların yaptığı tatlı madde', eş: [] },
+      { kelime: 'BALIK', anlam: 'Suda yaşayan omurgalı canlı', eş: [] },
+      { kelime: 'BALKON', anlam: 'Evin dışa uzanan bölümü', eş: [] },
+      { kelime: 'BARDAK', anlam: 'İçecek konulan kap', eş: [] }
+    ];
+
+    function clearResult() {
+      resultContainer.innerHTML = '';
+      searchInput.value = '';
+      suggestionsContainer.innerHTML = '';
+    }
+
+    function toggleFeedbackForm() {
+      feedbackForm.style.display = feedbackForm.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function submitFeedback() {
+      const text = document.getElementById('feedbackText').value.trim();
+      if (!text) return alert('Lütfen bir geri bildirim yazın.');
+      fetch('https://sheetdb.io/api/v1/h7w9iqvawa52z', {
+        method: 'POST',
+        body: JSON.stringify({ data: { mesaj: text } }),
+        headers: { 'Content-Type': 'application/json' }
+      }).then(r => {
+        alert('Teşekkürler!');
+        document.getElementById('feedbackText').value = '';
+        feedbackForm.style.display = 'none';
+      });
+    }
+
+    function renderSuggestions(matches) {
+      suggestionsContainer.innerHTML = '';
+      matches.forEach(obj => {
+        const div = document.createElement('div');
+        div.className = 'suggestion';
+        div.innerHTML = `<span class="main-word">${obj.kelime}</span>` +
+                        (obj.eş && obj.eş.length > 0 ? `<span class="synonym-hint">(eş: ${obj.eş.join(', ')})</span>` : '');
+        div.onclick = () => showDefinition(obj.kelime);
+        suggestionsContainer.appendChild(div);
+      });
+    }
+
+    function showDefinition(kelime) {
+      const found = kelimeler.find(k => k.kelime === kelime);
+      if (!found) return;
+
+      resultContainer.innerHTML = `
+        <div class="word-title">${found.kelime}</div>
+        <div class="description">${found.anlam}</div>
+        ${found.eş && found.eş.length > 0 ? `<div class="synonyms-list">Eş: ${found.eş.join(', ')}</div>` : ''}
+      `;
+    }
+
+    searchInput.addEventListener('input', () => {
+      const value = searchInput.value.trim().toUpperCase();
+      if (!value) {
+        suggestionsContainer.innerHTML = '';
+        return;
+      }
+
+      const matches = kelimeler.filter(item =>
+        item.kelime.startsWith(value) ||
+        (item.eş && item.eş.some(e => e.startsWith(value)))
+      );
+
+      const gösterilecek = [];
+
+      matches.forEach(item => {
+        if (item.kelime.startsWith(value)) {
+          gösterilecek.push(item);
+        } else {
+          // eş anlamlıdan geldi ama gösterilecek kelime item.kelime olacak
+          gösterilecek.push(item);
+        }
+      });
+
+      // eş kelimelere göre sıralama
+      gösterilecek.sort((a, b) => {
+        const aKey = (a.kelime.startsWith(value) ? a.kelime : (a.eş.find(e => e.startsWith(value)) || ''));
+        const bKey = (b.kelime.startsWith(value) ? b.kelime : (b.eş.find(e => e.startsWith(value)) || ''));
+        return aKey.localeCompare(bKey);
+      });
+
+      renderSuggestions(gösterilecek);
+    });
   </script>
 </body>
 </html>
