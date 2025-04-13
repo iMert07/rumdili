@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -80,7 +81,7 @@
       color: #333;
       width: 100%;
       box-sizing: border-box;
-      text-align: left;
+      text-align: left;  /* Bu satır eklenerek sonuçlar sola dayalı yapıldı */
     }
 
     #clock {
@@ -112,7 +113,7 @@
     }
 
     #clock-container {
-      text-align: center;
+      text-align: center; /* Saat ve tarih burada ortalanacak */
     }
   </style>
 </head>
@@ -189,7 +190,7 @@
         if (!query) {
           suggestionsDiv.innerHTML = '';
           if (lastSelectedWord) showResult(lastSelectedWord);
-          else anatolyaClock();
+          else showClock();  // sonuç yoksa saat göster
           displaySearchHistory();
           return;
         }
@@ -277,28 +278,20 @@
       `;
     }
 
-    function anatolyaClock() {
+    function showClock() {
       const resultDiv = document.getElementById('result');
       const now = new Date();
-      const totalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-      const anatolyaTotalMinutes = (totalSeconds / 3600) * 100;
-      const anatolyaHour = Math.floor(anatolyaTotalMinutes / 100);
-      const anatolyaMinute = Math.floor(anatolyaTotalMinutes % 100);
-
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-      const day = now.getDate();
-
-      const anatolyaDate = `${day.toString().padStart(2, '0')}.${month.toString().padStart(2, '0')}.${year}`;
+      const time = now.toLocaleTimeString('tr-TR', { hour12: false });
+      const date = now.toLocaleDateString('tr-TR');
 
       resultDiv.innerHTML = `
-        <div id="clock">⏱ ${anatolyaHour.toString().padStart(2, '0')}:${anatolyaMinute.toString().padStart(2, '0')}</div>
-        <div id="date">📅 ${anatolyaDate}</div>
+        <div id="clock">${time}</div>
+        <div id="date">${date}</div>
       `;
     }
 
     function updateClock() {
-      if (!lastSelectedWord) anatolyaClock();
+      if (!lastSelectedWord) showClock();
     }
 
     setInterval(updateClock, 1000);
@@ -307,7 +300,7 @@
       lastSelectedWord = null;
       document.getElementById('result').innerHTML = '';
       document.getElementById('searchInput').value = '';
-      anatolyaClock();
+      showClock();
     }
 
     function updateSearchHistory(query) {
@@ -344,7 +337,7 @@
 
     window.onload = () => {
       fetchWords();
-      anatolyaClock();
+      showClock();
     };
   </script>
 </body>
