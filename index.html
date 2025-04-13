@@ -123,10 +123,13 @@
     }
 
     function normalizeString(str) {
-      return toTurkishUpperCase(str || '')
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // aksanlı harfleri düzleştir
-        .replace(/[^A-ZĞÜŞİÖÇ]/g, '');   // sadece harfler kalsın
+      if (!str) return '';
+      return str
+        .normalize('NFD')                 // â → a + ̂ gibi parçalar
+        .replace(/[\u0300-\u036f]/g, '')  // aksanlı işaretleri temizle
+        .replace(/ı/g, 'i')               // Türkçeye özgü dönüşüm
+        .replace(/İ/g, 'i')
+        .toLowerCase();
     }
 
     let allWords = [];
@@ -156,53 +159,45 @@
       displaySearchHistory();
 
       searchInput.addEventListener('input', function () {
-        const query = normalizeString(this.value.trim());
+        const rawQuery = this.value.trim();
+        const query = normalizeString(rawQuery);
 
         if (!query) {
           suggestionsDiv.innerHTML = '';
-          if (lastSelectedWord) {
-            showResult(lastSelectedWord);
-          }
+          if (lastSelectedWord) showResult(lastSelectedWord);
           displaySearchHistory();
           return;
         }
 
-        const matches = [];
-        allWords.forEach(row => {
-          const wordNorm = normalizeString(row.Sözcük || '');
-          const synonyms = row['Eş Anlamlılar']
-            ? row['Eş Anlamlılar'].split(',').map(s => s.trim()) : [];
+        const matches = allWords.filter(row => {
+          const wordRaw = row.Sözcük || '';
+          const wordNorm = normalizeString(wordRaw);
+          const matchWord = wordNorm.startsWith(query);
 
-          if (wordNorm.startsWith(query)) {
-            matches.push({ match: row, priority: 1, matchedSynonym: null });
-          } else {
-            const synMatch = synonyms.find(s => normalizeString(s).startsWith(query));
-            if (synMatch) {
-              matches.push({ match: row, priority: 2, matchedSynonym: synMatch });
-            }
-          }
+          const synonyms = row['Eş Anlamlılar']
+            ? row['Eş Anlamlılar'].split(',').map(s => normalizeString(s.trim()))
+            : [];
+
+          const matchSynonym = synonyms.some(s => s.startsWith(query));
+
+          return matchWord || matchSynonym;
         });
 
-        matches.sort((a, b) => a.priority - b.priority);
         displaySuggestions(matches, query);
       });
 
       searchInput.addEventListener('focus', () => {
-        if (!searchInput.value.trim()) {
-          displaySearchHistory();
-        }
+        if (!searchInput.value.trim()) displaySearchHistory();
       });
 
       searchInput.addEventListener('blur', () => {
-        setTimeout(() => suggestionsDiv.innerHTML = '', 100);
+        setTimeout(() => document.getElementById('suggestions').innerHTML = '', 100);
       });
 
       searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           const firstSuggestion = suggestionsDiv.querySelector('.suggestion');
-          if (firstSuggestion) {
-            firstSuggestion.click();
-          }
+          if (firstSuggestion) firstSuggestion.click();
         }
       });
     }
@@ -216,13 +211,24 @@
         return;
       }
 
-      matches.slice(0, 12).forEach(({ match, matchedSynonym }) => {
+      matches.sort((a, b) =>
+        normalizeString(a.Sözcük).localeCompare(normalizeString(b.Sözcük))
+      ).slice(0, 12).forEach(match => {
         const suggestion = document.createElement('div');
         suggestion.className = 'suggestion';
 
+        const word = toTurkishUpperCase(match.Sözcük);
+        const synonyms = match['Eş Anlamlılar']
+          ? toTurkishUpperCase(match['Eş Anlamlılar']).split(',').map(x => x.trim())
+          : [];
+
+        const matchedSynonym = !normalizeString(match.Sözcük).startsWith(query)
+          ? synonyms.find(syn => normalizeString(syn).startsWith(query))
+          : null;
+
         suggestion.innerHTML = `
-          <span class="main-word">${toTurkishUpperCase(match.Sözcük)}</span>
-          ${matchedSynonym ? `<span class="synonym-hint">${toTurkishUpperCase(matchedSynonym)}</span>` : ''}
+          <span class="main-word">${word}</span>
+          ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
         `;
 
         suggestion.addEventListener('click', () => selectWord(match));
@@ -278,9 +284,7 @@
           suggestion.addEventListener('click', () => {
             searchInput.value = history;
             const selectedWord = allWords.find(row => toTurkishUpperCase(row.Sözcük) === history);
-            if (selectedWord) {
-              showResult(selectedWord);
-            }
+            if (selectedWord) showResult(selectedWord);
           });
           suggestionsDiv.appendChild(suggestion);
         });
