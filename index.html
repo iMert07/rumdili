@@ -76,7 +76,7 @@
       background-color: #f8f9fa;
       border-radius: 4px;
       text-transform: uppercase;
-      text-align: center;
+      text-align: left;  /* Sadece bu satır eklendi */
       font-size: 32px;
       color: #333;
       width: 100%;
@@ -87,10 +87,12 @@
       font-size: 48px;
       font-weight: bold;
       margin-bottom: 10px;
+      text-align: center; /* Saatin ortalanması için eklendi */
     }
 
     #date {
       font-size: 36px;
+      text-align: center; /* Tarihin ortalanması için eklendi */
     }
 
     .word-title {
@@ -144,10 +146,7 @@
       if (!str) return '';
       return str
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/ı/g, 'i')
-        .replace(/İ/g, 'i')
-        .toLowerCase();
+        .replace(/[\u0300-\u036f]/g, ''); /* Aksanları kaldırır */
     }
 
     let allWords = [];
@@ -272,66 +271,32 @@
     }
 
     function showClock() {
-      const resultDiv = document.getElementById('result');
+      const clockDiv = document.getElementById('clock');
+      const dateDiv = document.getElementById('date');
+
       const now = new Date();
-      const time = now.toLocaleTimeString('tr-TR', { hour12: false });
-      const date = now.toLocaleDateString('tr-TR');
-
-      resultDiv.innerHTML = `
-        <div id="clock">${time}</div>
-        <div id="date">${date}</div>
-      `;
-    }
-
-    function updateClock() {
-      if (!lastSelectedWord) showClock();
-    }
-
-    setInterval(updateClock, 1000);
-
-    function clearResult() {
-      lastSelectedWord = null;
-      document.getElementById('result').innerHTML = '';
-      document.getElementById('searchInput').value = '';
-      showClock();
+      clockDiv.innerHTML = now.toLocaleTimeString('tr-TR', { hour12: false });
+      dateDiv.innerHTML = now.toLocaleDateString('tr-TR', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
     }
 
     function updateSearchHistory(query) {
-      if (!searchHistory.includes(query)) {
-        searchHistory.unshift(query);
-      }
-      if (searchHistory.length > 12) {
-        searchHistory.pop();
-      }
+      searchHistory = searchHistory.filter(word => word !== query);
+      searchHistory.unshift(query);
+      searchHistory = searchHistory.slice(0, 5);
       localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
       displaySearchHistory();
     }
 
     function displaySearchHistory() {
       const suggestionsDiv = document.getElementById('suggestions');
-      suggestionsDiv.innerHTML = '';
-
-      const searchInput = document.getElementById('searchInput');
-
-      if (searchInput === document.activeElement && !searchInput.value.trim()) {
-        searchHistory.slice(0, 12).forEach(history => {
-          const suggestion = document.createElement('div');
-          suggestion.className = 'suggestion';
-          suggestion.innerHTML = `<span class="main-word">${history}</span>`;
-          suggestion.addEventListener('click', () => {
-            searchInput.value = history;
-            const selectedWord = allWords.find(row => toTurkishUpperCase(row.Sözcük) === history);
-            if (selectedWord) showResult(selectedWord);
-          });
-          suggestionsDiv.appendChild(suggestion);
-        });
-      }
+      suggestionsDiv.innerHTML = searchHistory
+        .map(query => `<div class="suggestion" onclick="selectWord({Sözcük: '${query}'})">${toTurkishUpperCase(query)}</div>`)
+        .join('');
     }
 
-    window.onload = () => {
-      fetchWords();
-      showClock();
-    };
+    fetchWords();
   </script>
 </body>
 </html>
