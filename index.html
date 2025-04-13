@@ -73,25 +73,10 @@
     }
 
     #result {
-      padding: 40px;
+      padding: 20px;
       background-color: #f8f9fa;
       border-radius: 4px;
       text-transform: uppercase;
-      font-size: 18px;
-      color: #333;
-      width: 100%;
-      box-sizing: border-box;
-      text-align: left;  /* Bu satır eklenerek sonuçlar sola dayalı yapıldı */
-    }
-
-    #clock {
-      font-size: 48px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    #date {
-      font-size: 36px;
     }
 
     .word-title {
@@ -111,10 +96,6 @@
       color: #666;
       margin-top: 15px;
     }
-
-    #clock-container {
-      text-align: center; /* Saat ve tarih burada ortalanacak */
-    }
   </style>
 </head>
 <body>
@@ -126,12 +107,7 @@
     <div id="suggestions-container">
       <div id="suggestions"></div>
     </div>
-    <div id="result">
-      <div id="clock-container">
-        <div id="clock"></div>
-        <div id="date"></div>
-      </div>
-    </div>
+    <div id="result"></div>
   </div>
 
   <script>
@@ -150,9 +126,9 @@
     function normalizeString(str) {
       if (!str) return '';
       return str
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/ı/g, 'i')
+        .normalize('NFD')                 // â → a + ̂ gibi parçalar
+        .replace(/[\u0300-\u036f]/g, '')  // aksanlı işaretleri temizle
+        .replace(/ı/g, 'i')               // Türkçeye özgü dönüşüm
         .replace(/İ/g, 'i')
         .toLowerCase();
     }
@@ -190,7 +166,6 @@
         if (!query) {
           suggestionsDiv.innerHTML = '';
           if (lastSelectedWord) showResult(lastSelectedWord);
-          else showClock();  // sonuç yoksa saat göster
           displaySearchHistory();
           return;
         }
@@ -254,7 +229,9 @@
 
         suggestion.innerHTML = `
           <span class="main-word">${word}</span>
-          ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}`;
+          ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
+        `;
+
         suggestion.addEventListener('click', () => selectWord(match));
         suggestionsDiv.appendChild(suggestion);
       });
@@ -278,29 +255,9 @@
       `;
     }
 
-    function showClock() {
-      const resultDiv = document.getElementById('result');
-      const now = new Date();
-      const time = now.toLocaleTimeString('tr-TR', { hour12: false });
-      const date = now.toLocaleDateString('tr-TR');
-
-      resultDiv.innerHTML = `
-        <div id="clock">${time}</div>
-        <div id="date">${date}</div>
-      `;
-    }
-
-    function updateClock() {
-      if (!lastSelectedWord) showClock();
-    }
-
-    setInterval(updateClock, 1000);
-
     function clearResult() {
-      lastSelectedWord = null;
       document.getElementById('result').innerHTML = '';
       document.getElementById('searchInput').value = '';
-      showClock();
     }
 
     function updateSearchHistory(query) {
@@ -335,10 +292,7 @@
       }
     }
 
-    window.onload = () => {
-      fetchWords();
-      showClock();
-    };
+    window.onload = fetchWords;
   </script>
 </body>
 </html>
