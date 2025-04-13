@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -128,17 +129,10 @@
     }
 
     #feedbackToggle {
-      color: #007bff;
-      text-decoration: underline;
       cursor: pointer;
-    }
-
-    .feedback-position {
-      text-align: right;
-      margin-top: -40px;
-      font-size: 18px;
-      font-weight: bold;
       color: black;
+      text-decoration: none;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -154,7 +148,7 @@
     <div id="result"></div>
 
     <!-- Geri Bildirim Yazısına Tıklanarak Form Açılır -->
-    <p id="feedbackToggle" class="feedback-position" onclick="toggleFeedbackForm()">Geri Bildirim</p>
+    <p id="feedbackToggle" onclick="toggleFeedbackForm()">Geri Bildirim</p>
 
     <!-- Geri Bildirim Formu -->
     <div id="feedbackForm">
@@ -179,9 +173,9 @@
     function normalizeString(str) {
       if (!str) return '';
       return str
-        .normalize('NFD')                 
-        .replace(/[\u0300-\u036f]/g, '')  
-        .replace(/ı/g, 'i')              
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ı/g, 'i')
         .replace(/İ/g, 'i')
         .toLowerCase();
     }
@@ -192,7 +186,7 @@
 
     async function fetchWords() {
       const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
-      const sheetName = 'Sözlük';  
+      const sheetName = 'Sözlük';
       const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
 
       try {
@@ -362,17 +356,17 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ Geri_Bildirim: feedbackText })
+        body: JSON.stringify({ data: { geri_bildirim: feedbackText } })
       })
       .then(response => response.json())
-      .then(() => {
-        alert('Geri bildiriminiz başarıyla gönderildi.');
-        document.getElementById('feedbackForm').reset();
-        toggleFeedbackForm();
+      .then(data => {
+        alert('Geri bildiriminiz başarıyla gönderildi!');
+        document.getElementById('feedbackForm').style.display = 'none';
+        document.getElementById('feedbackText').value = '';
       })
       .catch(error => {
-        alert('Bir hata oluştu. Lütfen tekrar deneyin.');
-        console.error('Geri bildirim gönderme hatası:', error);
+        console.error('Hata:', error);
+        alert('Geri bildiriminiz gönderilemedi. Lütfen tekrar deneyin.');
       });
     }
 
