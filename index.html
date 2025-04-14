@@ -180,6 +180,13 @@
       searchInput.addEventListener('input', function () {
         const rawQuery = this.value.trim();
         const query = normalizeString(rawQuery);
+
+        // Boşluk içeriyorsa sonuç gösterme
+        if (rawQuery.includes(' ')) {
+          suggestionsDiv.innerHTML = '<div class="suggestion">Sonuç bulunamadı</div>';
+          return;
+        }
+
         if (!query) {
           suggestionsDiv.innerHTML = '';
           if (lastSelectedWord) showResult(lastSelectedWord);
