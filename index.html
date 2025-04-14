@@ -12,8 +12,22 @@
       padding: 20px;
       font-size: 16px;
     }
-    .container {
-      margin-top: 20px;
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 10px;
+    }
+    .top-bar h1 {
+      margin: 0;
+      margin-top: -10px;
+    }
+    .feedback-toggle {
+      cursor: pointer;
+      text-decoration: underline;
+      margin: 0;
+      margin-top: 10px;
+      color: black;
     }
     #searchInput {
       width: 100%;
@@ -107,33 +121,25 @@
     #feedbackForm button:hover {
       background-color: #218838;
     }
-    #feedbackToggle {
-      color: #007bff;
-      text-decoration: underline;
-      cursor: pointer;
-      text-align: right;
-      float: right;
-      margin-top: -40px;
-    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="top-bar">
     <a href="/" onclick="clearResult(); return false;" style="text-decoration: none; color: black;">
-      <h1 style="display: inline-block;">RUM TILI</h1>
+      <h1>RUM TILI</h1>
     </a>
-    <p id="feedbackToggle" onclick="toggleFeedbackForm()">Geri Bildirim Yaz</p>
+    <p id="feedbackToggle" class="feedback-toggle" onclick="toggleFeedbackForm()">Geri Bildirim Yaz</p>
+  </div>
 
-    <input type="text" id="searchInput" placeholder="Sözcük ara..." autocomplete="off">
-    <div id="suggestions-container">
-      <div id="suggestions"></div>
-    </div>
-    <div id="result"></div>
+  <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
+  <div id="suggestions-container">
+    <div id="suggestions"></div>
+  </div>
+  <div id="result"></div>
 
-    <div id="feedbackForm">
-      <textarea id="feedbackText" placeholder="Geri bildiriminizi buraya yazın..."></textarea>
-      <button onclick="submitFeedback()">Gönder</button>
-    </div>
+  <div id="feedbackForm">
+    <textarea id="feedbackText" placeholder="Geri bildiriminizi buraya yazın..."></textarea>
+    <button onclick="submitFeedback()">Gönder</button>
   </div>
 
   <script>
@@ -162,7 +168,7 @@
       } catch (error) {
         console.error('VERİ ÇEKME HATASI:', error);
         document.getElementById('result').innerHTML =
-          '<p style="color: red;">Veriler yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</p>';
+          '<p style="color: red;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</p>';
       }
     }
 
