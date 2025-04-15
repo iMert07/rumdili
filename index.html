@@ -73,13 +73,23 @@
   <div id="result"></div>
 
   <script>
-    function normalize(str) {
-      return str
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/ı/g, "i")
-        .replace(/İ/g, "i")
-        .toLowerCase();
+    const alphabet = 'abcçdefgğhıijklmnoöprsştuüvxyzwq';
+    function normalizeForSearch(str) {
+      return str.toLowerCase().normalize("NFC");
+    }
+
+    function customCompare(a, b) {
+      const alen = a.length, blen = b.length;
+      const minLen = Math.min(alen, blen);
+      for (let i = 0; i < minLen; i++) {
+        const ca = a[i], cb = b[i];
+        if (ca === cb) continue;
+        const ia = alphabet.indexOf(ca);
+        const ib = alphabet.indexOf(cb);
+        if (ia === -1 || ib === -1) return ca.localeCompare(cb);
+        return ia - ib;
+      }
+      return alen - blen;
     }
 
     let allWords = [];
@@ -91,19 +101,19 @@
     }
 
     function displaySuggestions(query) {
-      const q = normalize(query);
+      const q = normalizeForSearch(query);
       const matches = [];
 
       allWords.forEach(row => {
         const main = row.Sözcük || '';
-        const normMain = normalize(main);
+        const normMain = normalizeForSearch(main);
         const synonyms = (row['Eş Anlamlılar'] || '').split(',').map(s => s.trim());
-        const normSynonyms = synonyms.map(s => normalize(s));
+        const normSynonyms = synonyms.map(s => normalizeForSearch(s));
 
         if (normMain.startsWith(q)) {
           matches.push({ shown: main, word: main, synonym: null, row });
         } else {
-          const matchedSyn = synonyms.find(s => normalize(s).startsWith(q));
+          const matchedSyn = synonyms.find(s => normalizeForSearch(s).startsWith(q));
           if (matchedSyn) {
             matches.push({ shown: matchedSyn, word: main, synonym: matchedSyn, row });
           }
@@ -111,9 +121,9 @@
       });
 
       matches.sort((a, b) => {
-        const cmp = normalize(a.shown).localeCompare(normalize(b.shown));
+        const cmp = customCompare(normalizeForSearch(a.shown), normalizeForSearch(b.shown));
         if (cmp !== 0) return cmp;
-        return normalize(a.word).localeCompare(normalize(b.word));
+        return customCompare(normalizeForSearch(a.word), normalizeForSearch(b.word));
       });
 
       const container = document.getElementById('suggestions');
