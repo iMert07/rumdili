@@ -150,9 +150,7 @@
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, '') // tüm aksanları kaldır
         .replace(/â/g, 'a')  // Â => A
-        .replace(/î/g, 'i')  // Î => İ
-        .replace(/ı/g, 'i')  // ı => i
-        .replace(/i/g, 'i'); // i zaten küçük harf, düzleştir
+        .replace(/î/g, 'i'); // Î => İ
     }
 
     let allWords = [];
