@@ -148,7 +148,7 @@
       return str
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, '') // tüm aksanları kaldır
+        .replace(/[\u0300-\u036f]/g, '') // aksanları kaldırıyoruz
         .replace(/â/g, 'a')  // Â => A
         .replace(/î/g, 'i'); // Î => İ
     }
