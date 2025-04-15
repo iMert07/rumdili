@@ -188,14 +188,11 @@
         }
 
         const matches = allWords.filter(row => {
-          const wordRaw = row.Sözcük || '';
-          const wordNorm = normalizeString(wordRaw);
-          const matchWord = wordNorm.startsWith(query);
+          const main = normalizeString(row.Sözcük || '');
           const synonyms = row['Eş Anlamlılar']
             ? row['Eş Anlamlılar'].split(',').map(s => normalizeString(s.trim()))
             : [];
-          const matchSynonym = synonyms.some(s => s.startsWith(query));
-          return matchWord || matchSynonym;
+          return main.startsWith(query) || synonyms.some(s => s.startsWith(query));
         });
 
         displaySuggestions(matches, query);
@@ -228,24 +225,31 @@
       matches.sort((a, b) =>
         normalizeString(a.Sözcük).localeCompare(normalizeString(b.Sözcük))
       ).slice(0, 12).forEach(match => {
-        const suggestion = document.createElement('div');
-        suggestion.className = 'suggestion';
-
         const word = match.Sözcük;
         const synonyms = match['Eş Anlamlılar']
           ? match['Eş Anlamlılar'].split(',').map(x => x.trim())
           : [];
 
-        const matchedSynonym = !normalizeString(match.Sözcük).startsWith(query)
-          ? synonyms.find(syn => normalizeString(syn).startsWith(query))
-          : null;
+        const queryNorm = normalizeString(query);
+        const mainNorm = normalizeString(word);
+        let visible = '';
+        let hint = '';
 
-        suggestion.innerHTML = `
-          <span class="main-word">${word}</span>
-          ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
-        `;
-        suggestion.addEventListener('click', () => selectWord(match));
-        suggestionsDiv.appendChild(suggestion);
+        if (mainNorm.startsWith(queryNorm)) {
+          visible = word;
+        } else {
+          const matchedSyn = synonyms.find(s => normalizeString(s).startsWith(queryNorm));
+          if (matchedSyn) {
+            visible = matchedSyn;
+            hint = word;
+          }
+        }
+
+        const div = document.createElement('div');
+        div.className = 'suggestion';
+        div.innerHTML = `<span class="main-word">${visible}</span>${hint ? `<span class="synonym-hint">${hint}</span>` : ''}`;
+        div.addEventListener('click', () => selectWord(match));
+        suggestionsDiv.appendChild(div);
       });
     }
 
@@ -289,15 +293,15 @@
       const searchInput = document.getElementById('searchInput');
       if (searchInput === document.activeElement && !searchInput.value.trim()) {
         searchHistory.slice(0, 12).forEach(history => {
-          const suggestion = document.createElement('div');
-          suggestion.className = 'suggestion';
-          suggestion.innerHTML = `<span class="main-word">${history}</span>`;
-          suggestion.addEventListener('click', () => {
+          const div = document.createElement('div');
+          div.className = 'suggestion';
+          div.innerHTML = `<span class="main-word">${history}</span>`;
+          div.addEventListener('click', () => {
             searchInput.value = history;
-            const selectedWord = allWords.find(row => row.Sözcük === history);
-            if (selectedWord) showResult(selectedWord);
+            const found = allWords.find(row => row.Sözcük === history);
+            if (found) showResult(found);
           });
-          suggestionsDiv.appendChild(suggestion);
+          suggestionsDiv.appendChild(div);
         });
       }
     }
@@ -316,11 +320,9 @@
 
       const tarih = new Date().toLocaleString('tr-TR');
 
-      fetch('https://sheetdb.io/api/v1/mt09gl0tun8di', {
+      fetch('https://sheetdb.io/api/v1/h7w9iqvawa52z', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: {
             "Tarih": tarih,
@@ -329,13 +331,12 @@
         })
       })
       .then(response => response.json())
-      .then(data => {
+      .then(() => {
         alert('Geri bildiriminiz başarıyla gönderildi!');
         document.getElementById('feedbackForm').style.display = 'none';
         document.getElementById('feedbackText').value = '';
       })
-      .catch(error => {
-        console.error('Hata:', error);
+      .catch(() => {
         alert('Geri bildiriminiz gönderilemedi. Lütfen tekrar deneyin.');
       });
     }
