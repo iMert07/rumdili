@@ -146,11 +146,7 @@
     function normalizeString(str) {
       if (!str) return '';
       return str
-        .toLowerCase() // sadece küçük harfleri al
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, '') // aksanları kaldırıyoruz
-        .replace(/â/g, 'a')  // Â => A
-        .replace(/î/g, 'i'); // Î => İ
+        .toLowerCase(); // Sadece küçük harfe dönüştürme, aksanlar veya özel karakter eşleşmesi yapma.
     }
 
     let allWords = [];
