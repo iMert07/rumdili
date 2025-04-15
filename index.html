@@ -4,152 +4,46 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>RUM TILI</title>
+  <!-- Stil kısmını olduğu gibi koruyabilirsin, burayı kesiyorum -->
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      font-size: 16px;
-    }
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 10px;
-    }
-    .top-bar h1 {
-      margin: 0;
-      margin-top: -10px;
-    }
-    .feedback-toggle {
-      cursor: pointer;
-      text-decoration: underline;
-      margin: 0;
-      margin-top: 10px;
-      color: black;
-    }
-    #searchInput {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      box-sizing: border-box;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      margin-bottom: 15px;
-    }
-    .suggestion {
-      height: 40px;
-      line-height: 40px;
-      padding: 0 10px;
-      background-color: #f8f9fa;
-      margin: 4px 0;
-      cursor: pointer;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      font-size: 14px;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    .suggestion:hover {
-      background-color: #e9ecef;
-    }
-    .main-word {
-      font-weight: bold;
-    }
-    .synonym-hint {
-      color: #888;
-      margin-left: 8px;
-      font-size: 0.95em;
-    }
-    #suggestions-container {
-      height: 264px;
-      overflow: hidden;
-      margin-bottom: 24px;
-    }
-    #suggestions {
-      overflow-y: auto;
-      max-height: 264px;
-      border: 1px solid #eee;
-      border-radius: 4px;
-    }
-    #result {
-      padding: 20px;
-      background-color: #f8f9fa;
-      border-radius: 4px;
-    }
-    .word-title {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .description {
-      font-size: 18px;
-      line-height: 1.5;
-      margin-top: 15px;
-    }
-    .synonyms-list, .etymology {
-      font-size: 14px;
-      color: #666;
-      margin-top: 15px;
-    }
-    #feedbackForm {
-      display: none;
-      margin-top: 20px;
-      background-color: #f8f9fa;
-      padding: 20px;
-      border-radius: 4px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-    #feedbackForm textarea {
-      width: 100%;
-      height: 100px;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    #feedbackForm button {
-      padding: 10px 20px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    #feedbackForm button:hover {
-      background-color: #218838;
-    }
+    /* ... mevcut stil kodların ... */
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <a href="/" onclick="clearResult(); return false;" style="text-decoration: none; color: black;">
-      <h1>RUM TILI</h1>
-    </a>
-    <p id="feedbackToggle" class="feedback-toggle" onclick="toggleFeedbackForm()">Geri Bildirim Yaz</p>
-  </div>
-
-  <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
-  <div id="suggestions-container">
-    <div id="suggestions"></div>
-  </div>
-  <div id="result"></div>
-
-  <div id="feedbackForm">
-    <textarea id="feedbackText" placeholder="Geri bildiriminizi buraya yazın..."></textarea>
-    <button onclick="submitFeedback()">Gönder</button>
-  </div>
+  <!-- ... mevcut body kısmı (başlık, arama kutusu vs.) ... -->
 
   <script>
     function normalizeString(str) {
       if (!str) return '';
       return str.normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
-                .replace(/ı/g, 'i')
+                .replace(/ı/g, 'ı')
                 .replace(/İ/g, 'i')
                 .toLowerCase();
+    }
+
+    const turkishOrder = [
+      'a', 'b', 'c', 'ç', 'd', 'e', 'f', 'g', 'ğ', 'h',
+      'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'ö', 'p',
+      'r', 's', 'ş', 't', 'u', 'ü', 'v', 'x', 'y', 'z'
+    ];
+
+    function customTurkishCompare(a, b) {
+      const aStr = normalizeString(a);
+      const bStr = normalizeString(b);
+      const minLength = Math.min(aStr.length, bStr.length);
+
+      for (let i = 0; i < minLength; i++) {
+        const aChar = aStr[i];
+        const bChar = bStr[i];
+
+        const aIndex = turkishOrder.indexOf(aChar);
+        const bIndex = turkishOrder.indexOf(bChar);
+
+        if (aIndex !== bIndex) return aIndex - bIndex;
+      }
+
+      return aStr.length - bStr.length;
     }
 
     let allWords = [];
@@ -225,9 +119,20 @@
         return;
       }
 
-      matches.sort((a, b) =>
-        normalizeString(a.Sözcük).localeCompare(normalizeString(b.Sözcük))
-      ).slice(0, 12).forEach(match => {
+      matches.sort((a, b) => {
+        const aMatched = normalizeString(a.Sözcük).startsWith(query)
+          ? a.Sözcük
+          : (a['Eş Anlamlılar'] || '').split(',').find(s => normalizeString(s.trim()).startsWith(query)) || '';
+
+        const bMatched = normalizeString(b.Sözcük).startsWith(query)
+          ? b.Sözcük
+          : (b['Eş Anlamlılar'] || '').split(',').find(s => normalizeString(s.trim()).startsWith(query)) || '';
+
+        const primaryCompare = customTurkishCompare(aMatched, bMatched);
+        if (primaryCompare !== 0) return primaryCompare;
+
+        return customTurkishCompare(a.Sözcük, b.Sözcük);
+      }).slice(0, 12).forEach(match => {
         const suggestion = document.createElement('div');
         suggestion.className = 'suggestion';
 
@@ -241,104 +146,15 @@
           : null;
 
         suggestion.innerHTML = `
-          <span class="main-word">${word}</span>
-          ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
+          <span class="main-word">${matchedSynonym || word}</span>
+          ${matchedSynonym ? `<span class="synonym-hint">${word}</span>` : ''}
         `;
         suggestion.addEventListener('click', () => selectWord(match));
         suggestionsDiv.appendChild(suggestion);
       });
     }
 
-    function selectWord(word) {
-      lastSelectedWord = word;
-      document.getElementById('searchInput').value = word.Sözcük;
-      document.getElementById('suggestions').innerHTML = '';
-      showResult(word);
-      updateSearchHistory(word.Sözcük);
-    }
-
-    function showResult(word) {
-      const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = `
-        <div class="word-title">${word.Sözcük}</div>
-        <div class="synonyms-list">${word['Eş Anlamlılar'] || ''}</div>
-        <div class="description">${word.Açıklama || 'Açıklama bulunmamaktadır.'}</div>
-        <div class="etymology">${word.Öz || ''}</div>
-      `;
-    }
-
-    function clearResult() {
-      document.getElementById('result').innerHTML = '';
-      document.getElementById('searchInput').value = '';
-    }
-
-    function updateSearchHistory(query) {
-      if (!searchHistory.includes(query)) {
-        searchHistory.unshift(query);
-      }
-      if (searchHistory.length > 12) {
-        searchHistory.pop();
-      }
-      localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
-      displaySearchHistory();
-    }
-
-    function displaySearchHistory() {
-      const suggestionsDiv = document.getElementById('suggestions');
-      suggestionsDiv.innerHTML = '';
-      const searchInput = document.getElementById('searchInput');
-      if (searchInput === document.activeElement && !searchInput.value.trim()) {
-        searchHistory.slice(0, 12).forEach(history => {
-          const suggestion = document.createElement('div');
-          suggestion.className = 'suggestion';
-          suggestion.innerHTML = `<span class="main-word">${history}</span>`;
-          suggestion.addEventListener('click', () => {
-            searchInput.value = history;
-            const selectedWord = allWords.find(row => row.Sözcük === history);
-            if (selectedWord) showResult(selectedWord);
-          });
-          suggestionsDiv.appendChild(suggestion);
-        });
-      }
-    }
-
-    function toggleFeedbackForm() {
-      const feedbackForm = document.getElementById('feedbackForm');
-      feedbackForm.style.display = feedbackForm.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function submitFeedback() {
-      const feedbackText = document.getElementById('feedbackText').value.trim();
-      if (!feedbackText) {
-        alert('Lütfen geri bildirim yazın.');
-        return;
-      }
-
-      const tarih = new Date().toLocaleString('tr-TR');
-
-      fetch('https://sheetdb.io/api/v1/mt09gl0tun8di', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          data: {
-            "Tarih": tarih,
-            "Mesaj": feedbackText
-          }
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        alert('Geri bildiriminiz başarıyla gönderildi!');
-        document.getElementById('feedbackForm').style.display = 'none';
-        document.getElementById('feedbackText').value = '';
-      })
-      .catch(error => {
-        console.error('Hata:', error);
-        alert('Geri bildiriminiz gönderilemedi. Lütfen tekrar deneyin.');
-      });
-    }
+    // Geri kalan kod (selectWord, showResult, clearResult, updateSearchHistory vs.) aynı şekilde kalabilir.
 
     fetchWords();
   </script>
