@@ -145,8 +145,7 @@
   <script>
     function normalizeString(str) {
       if (!str) return '';
-      return str
-        .toLowerCase(); // Sadece küçük harfe dönüştürme, aksanlar veya özel karakter eşleşmesi yapma.
+      return str.toLowerCase(); // Sadece küçük harfe çeviriyoruz, başka bir şey yapmıyoruz.
     }
 
     let allWords = [];
@@ -184,15 +183,23 @@
           return;
         }
 
-        const matches = allWords.filter(row => {
-          const wordRaw = row.Sözcük || '';
-          const wordNorm = normalizeString(wordRaw);
-          const matchWord = wordNorm.startsWith(query);
+        const matches = [];
+        allWords.forEach(row => {
+          const mainWord = row.Sözcük || '';
+          const mainNorm = normalizeString(mainWord);
           const synonyms = row['Eş Anlamlılar']
-            ? row['Eş Anlamlılar'].split(',').map(s => normalizeString(s.trim()))
+            ? row['Eş Anlamlılar'].split(',').map(s => s.trim())
             : [];
-          const matchSynonym = synonyms.some(s => s.startsWith(query));
-          return matchWord || matchSynonym;
+
+          if (mainNorm.startsWith(query)) {
+            matches.push({ type: 'main', word: mainWord, data: row });
+          } else {
+            synonyms.forEach(syn => {
+              if (normalizeString(syn).startsWith(query)) {
+                matches.push({ type: 'synonym', synonym: syn, main: mainWord, data: row });
+              }
+            });
+          }
         });
 
         displaySuggestions(matches, query);
@@ -222,26 +229,24 @@
         return;
       }
 
-      matches.sort((a, b) =>
-        normalizeString(a.Sözcük).localeCompare(normalizeString(b.Sözcük))
-      ).slice(0, 12).forEach(match => {
+      matches.sort((a, b) => {
+        const aWord = a.type === 'main' ? a.word : a.synonym;
+        const bWord = b.type === 'main' ? b.word : b.synonym;
+        return normalizeString(aWord).localeCompare(normalizeString(bWord));
+      }).slice(0, 12).forEach(match => {
         const suggestion = document.createElement('div');
         suggestion.className = 'suggestion';
 
-        const word = match.Sözcük;
-        const synonyms = match['Eş Anlamlılar']
-          ? match['Eş Anlamlılar'].split(',').map(x => x.trim())
-          : [];
+        if (match.type === 'main') {
+          suggestion.innerHTML = `<span class="main-word">${match.word}</span>`;
+        } else {
+          suggestion.innerHTML = `
+            <span class="main-word">${match.synonym}</span>
+            <span class="synonym-hint">${match.main}</span>
+          `;
+        }
 
-        const matchedSynonym = !normalizeString(match.Sözcük).startsWith(query)
-          ? synonyms.find(syn => normalizeString(syn).startsWith(query))
-          : null;
-
-        suggestion.innerHTML = `
-          <span class="main-word">${word}</span>
-          ${matchedSynonym ? `<span class="synonym-hint">${matchedSynonym}</span>` : ''}
-        `;
-        suggestion.addEventListener('click', () => selectWord(match));
+        suggestion.addEventListener('click', () => selectWord(match.data));
         suggestionsDiv.appendChild(suggestion);
       });
     }
@@ -315,15 +320,8 @@
 
       fetch('https://sheetdb.io/api/v1/mt09gl0tun8di', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          data: {
-            "Tarih": tarih,
-            "Mesaj": feedbackText
-          }
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { "Tarih": tarih, "Mesaj": feedbackText } })
       })
       .then(response => response.json())
       .then(() => {
