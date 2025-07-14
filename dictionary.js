@@ -1,5 +1,6 @@
 function normalizeString(str) {
-  return str ? str.toLowerCase() : '';
+  if (!str) return '';
+  return str.toLowerCase(); // Sadece küçük harfe çeviriyoruz, başka bir şey yapmıyoruz.
 }
 
 let allWords = [];
@@ -15,10 +16,10 @@ async function fetchWords() {
     const response = await fetch(url);
     allWords = await response.json();
     setupSearch();
-  } catch (e) {
-    console.error('VERİ ÇEKME HATASI:', e);
+  } catch (error) {
+    console.error('VERİ ÇEKME HATASI:', error);
     document.getElementById('result').innerHTML =
-      '<p style="color:red;">VERİLER YÜKLENİRKEN HATA OLUŞTU. SAYFAYI YENİLEYİN.</p>';
+      '<p style="color: red;">VERİLER YÜKLENİRKEN HATA OLUŞTU. LÜTFEN SAYFAYI YENİLEYİN.</p>';
   }
 }
 
@@ -27,8 +28,9 @@ function setupSearch() {
   const suggestionsDiv = document.getElementById('suggestions');
   displaySearchHistory();
 
-  searchInput.addEventListener('input', () => {
-    const query = normalizeString(searchInput.value.trim());
+  searchInput.addEventListener('input', function () {
+    const rawQuery = this.value.trim();
+    const query = normalizeString(rawQuery);
     if (!query) {
       suggestionsDiv.innerHTML = '';
       if (lastSelectedWord) showResult(lastSelectedWord);
@@ -40,7 +42,9 @@ function setupSearch() {
     allWords.forEach(row => {
       const mainWord = row.Sözcük || '';
       const mainNorm = normalizeString(mainWord);
-      const synonyms = row['Eş Anlamlılar'] ? row['Eş Anlamlılar'].split(',').map(s => s.trim()) : [];
+      const synonyms = row['Eş Anlamlılar']
+        ? row['Eş Anlamlılar'].split(',').map(s => s.trim())
+        : [];
 
       if (mainNorm.startsWith(query)) {
         matches.push({ type: 'main', word: mainWord, data: row });
@@ -61,10 +65,10 @@ function setupSearch() {
   });
 
   searchInput.addEventListener('blur', () => {
-    setTimeout(() => (suggestionsDiv.innerHTML = ''), 100);
+    setTimeout(() => document.getElementById('suggestions').innerHTML = '', 100);
   });
 
-  searchInput.addEventListener('keydown', e => {
+  searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       const firstSuggestion = suggestionsDiv.querySelector('.suggestion');
       if (firstSuggestion) firstSuggestion.click();
@@ -72,7 +76,7 @@ function setupSearch() {
   });
 }
 
-function displaySuggestions(matches) {
+function displaySuggestions(matches, query) {
   const suggestionsDiv = document.getElementById('suggestions');
   suggestionsDiv.innerHTML = '';
   if (matches.length === 0) {
@@ -80,26 +84,26 @@ function displaySuggestions(matches) {
     return;
   }
 
-  matches
-    .sort((a, b) => {
-      const aWord = a.type === 'main' ? a.word : a.synonym;
-      const bWord = b.type === 'main' ? b.word : b.synonym;
-      return normalizeString(aWord).localeCompare(normalizeString(bWord));
-    })
-    .slice(0, 12)
-    .forEach(match => {
-      const suggestion = document.createElement('div');
-      suggestion.className = 'suggestion';
+  matches.sort((a, b) => {
+    const aWord = a.type === 'main' ? a.word : a.synonym;
+    const bWord = b.type === 'main' ? b.word : b.synonym;
+    return normalizeString(aWord).localeCompare(normalizeString(bWord));
+  }).slice(0, 12).forEach(match => {
+    const suggestion = document.createElement('div');
+    suggestion.className = 'suggestion';
 
-      if (match.type === 'main') {
-        suggestion.innerHTML = `<span class="main-word">${match.word}</span>`;
-      } else {
-        suggestion.innerHTML = `<span class="main-word">${match.synonym}</span><span class="synonym-hint">${match.main}</span>`;
-      }
+    if (match.type === 'main') {
+      suggestion.innerHTML = `<span class="main-word">${match.word}</span>`;
+    } else {
+      suggestion.innerHTML = `
+        <span class="main-word">${match.synonym}</span>
+        <span class="synonym-hint">${match.main}</span>
+      `;
+    }
 
-      suggestion.addEventListener('click', () => selectWord(match.data));
-      suggestionsDiv.appendChild(suggestion);
-    });
+    suggestion.addEventListener('click', () => selectWord(match.data));
+    suggestionsDiv.appendChild(suggestion);
+  });
 }
 
 function selectWord(word) {
@@ -126,8 +130,12 @@ function clearResult() {
 }
 
 function updateSearchHistory(query) {
-  if (!searchHistory.includes(query)) searchHistory.unshift(query);
-  if (searchHistory.length > 12) searchHistory.pop();
+  if (!searchHistory.includes(query)) {
+    searchHistory.unshift(query);
+  }
+  if (searchHistory.length > 12) {
+    searchHistory.pop();
+  }
   localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
   displaySearchHistory();
 }
@@ -144,7 +152,7 @@ function displaySearchHistory() {
       suggestion.addEventListener('click', () => {
         searchInput.value = history;
         const selectedWord = allWords.find(row => row.Sözcük === history);
-        if (selectedWord) selectWord(selectedWord);
+        if (selectedWord) showResult(selectedWord);
       });
       suggestionsDiv.appendChild(suggestion);
     });
@@ -168,18 +176,18 @@ function submitFeedback() {
   fetch('https://sheetdb.io/api/v1/mt09gl0tun8di', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ data: { Tarih: tarih, Mesaj: feedbackText } })
+    body: JSON.stringify({ data: { "Tarih": tarih, "Mesaj": feedbackText } })
   })
-    .then(response => response.json())
-    .then(() => {
-      document.getElementById('feedbackText').value = '';
-      toggleFeedbackForm();
-      alert('Geri bildiriminiz alındı, teşekkür ederiz!');
-    })
-    .catch(error => {
-      console.error('Geri bildirim gönderilirken hata oluştu:', error);
-      alert('Bir hata oluştu, lütfen tekrar deneyin.');
-    });
+  .then(response => response.json())
+  .then(() => {
+    document.getElementById('feedbackText').value = '';
+    toggleFeedbackForm();
+    alert('Geri bildiriminiz alındı, teşekkür ederiz!');
+  })
+  .catch(error => {
+    console.error('Geri bildirim gönderilirken hata oluştu:', error);
+    alert('Bir hata oluştu, lütfen tekrar deneyin.');
+  });
 }
 
 fetchWords();
