@@ -1,27 +1,44 @@
+:root {
+    --bg-color: #f2f2f2;
+    --text-color: #000;
+    --container-bg: #fff;
+    --input-border: #ccc;
+}
+
+body.dark {
+    --bg-color: #121212;
+    --text-color: #eee;
+    --container-bg: #1e1e1e;
+    --input-border: #555;
+}
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
 }
+
 .container {
-    background-color: white;
+    background-color: var(--container-bg);
     padding: 20px 30px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     text-align: center;
 }
+
 input[type="text"] {
     width: 80%;
     padding: 10px;
     margin: 10px 0;
-    border: 1px solid #ccc;
+    border: 1px solid var(--input-border);
     border-radius: 5px;
 }
+
 #result {
     margin-top: 15px;
     font-size: 18px;
