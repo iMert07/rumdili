@@ -2,7 +2,7 @@
 // Bu, arama ve eşleştirme işlemlerinin daha tutarlı olmasını sağlar.
 function normalizeString(str) {
     if (!str) return '';
-    return str.toLowerCase();
+    return str.toLocaleLowerCase('tr-TR');
 }
 
 // Uygulamanın genel durumunu tutan değişkenler.
@@ -15,11 +15,11 @@ let isGreek = false; // Alfabenin başlangıç durumu (Latin)
 const latinToGreekMap = {
     "a":"Α","A":"Α",
     "e":"Ε","E":"Ε",
-    "i":"Ͱ","İ":"Ͱ",
+    "i":"Ͱ","I":"Ͱ", // i ve İ farklı
+    "ı":"Ь","İ":"Ь", // ı ve I farklı
     "n":"Ν","N":"Ν",
     "r":"Ρ","R":"Ρ",
     "l":"L","L":"L",
-    "ı":"Ь","I":"Ь",
     "k":"Κ","K":"Κ",
     "d":"D","D":"D",
     "m":"Μ","M":"Μ",
@@ -28,6 +28,7 @@ const latinToGreekMap = {
     "s":"Σ","S":"Σ",
     "u":"Υ","U":"Υ",
     "o":"Ϙ","O":"Ϙ",
+    "ö":"Ω","Ö":"Ω",
     "b":"Β","B":"Β",
     "ş":"Ш","Ş":"Ш",
     "ü":"U","Ü":"U",
@@ -39,18 +40,10 @@ const latinToGreekMap = {
     "c":"G","C":"G",
     "h":"Η","H":"Η",
     "p":"Π","P":"Π",
-    "ö":"Ω","Ö":"Ω",
     "f":"V","F":"V",
     "x":"Ψ","X":"Ψ",
     "j":"Ϸ","J":"Ϸ"
 };
-
-// Yunan alfabesinden Latin alfabesine dönüşüm için ters eşleşme haritası oluştur.
-const greekToLatinMap = {};
-for (const key in latinToGreekMap) {
-    const value = latinToGreekMap[key];
-    greekToLatinMap[value] = key;
-}
 
 const translations = {
     'tr': {
@@ -149,14 +142,7 @@ function setupSearch() {
 
     searchInput.addEventListener('input', function () {
         const rawQuery = this.value.trim();
-        let query;
-
-        // Yunan alfabesi modundaysa, metni Latin'e dönüştürerek ara
-        if (isGreek) {
-            query = normalizeString(convertToLatin(rawQuery));
-        } else {
-            query = normalizeString(rawQuery);
-        }
+        const query = normalizeString(rawQuery); // Doğrudan normalize et, dönüştürme yapma
 
         if (!query) {
             suggestionsDiv.innerHTML = '';
@@ -281,7 +267,7 @@ function displaySuggestions(matches, query) {
 // Bir sözcük seçildiğinde sonuçları gösterir ve geçmişi günceller.
 function selectWord(word) {
     lastSelectedWord = word;
-    document.getElementById('searchInput').value = word.Sözcük;
+    document.getElementById('searchInput').value = isGreek ? convertToGreek(word.Sözcük) : word.Sözcük;
     document.getElementById('suggestions').innerHTML = '';
     document.getElementById('suggestions-container').classList.add('hidden');
     showResult(word);
@@ -422,18 +408,6 @@ function convertToGreek(text) {
         const latinChar = char;
         const greekChar = latinToGreekMap[latinChar];
         convertedText += greekChar || latinChar;
-    }
-    return convertedText;
-}
-
-// Metni Latin alfabesine dönüştürme fonksiyonu
-function convertToLatin(text) {
-    if (!text) return '';
-    let convertedText = '';
-    for (let char of text) {
-        const greekChar = char;
-        const latinChar = greekToLatinMap[greekChar];
-        convertedText += latinChar || greekChar;
     }
     return convertedText;
 }
