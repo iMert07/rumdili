@@ -1,6 +1,7 @@
+
 function normalizeString(str) {
   if (!str) return '';
-  return str.toLowerCase(); // Sadece küçük harfe çeviriyoruz, başka bir şey yapmıyoruz.
+  return str.toLowerCase();
 }
 
 let allWords = [];
