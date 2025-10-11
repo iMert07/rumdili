@@ -61,8 +61,9 @@ const translations = {
         'word_title': 'Sözcük',
         'synonyms_title': 'Eş Anlamlılar',
         'description_title': 'Açıklama',
+        'type_title': 'Tür',
+        'example_title': 'Örnek',
         'etymology_title': 'Köken',
-        'not_found': 'Bulunmamaktadır.',
         'no_result': 'Sonuç bulunamadı'
     },
     'gr': {} // Bu kısım convertToGreek fonksiyonuyla dinamik olarak doldurulacak
@@ -142,7 +143,7 @@ function setupSearch() {
 
     searchInput.addEventListener('input', function () {
         const rawQuery = this.value.trim();
-        const query = normalizeString(rawQuery); // Doğrudan normalize et, dönüştürme yapma
+        const query = normalizeString(rawQuery);
 
         if (!query) {
             suggestionsDiv.innerHTML = '';
@@ -278,37 +279,64 @@ function selectWord(word) {
 function showResult(word) {
     const resultDiv = document.getElementById('result');
     
-    let wordToDisplay = word.Sözcük;
-    let synonymsToDisplay = word['Eş Anlamlılar'] || translations.tr.not_found;
-    let descriptionToDisplay = word.Açıklama || translations.tr.not_found;
-    let originToDisplay = word.Öz || translations.tr.not_found;
+    let wordToDisplay = word.Sözcük || '';
+    let synonymsToDisplay = word['Eş Anlamlılar'] || '';
+    let descriptionToDisplay = word.Açıklama || '';
+    let typeToDisplay = word.Tür || '';
+    let exampleToDisplay = word.Örnek || '';
+    let etymologyToDisplay = word.Köken || '';
 
     if (isGreek) {
       wordToDisplay = convertToGreek(wordToDisplay);
       synonymsToDisplay = convertToGreek(synonymsToDisplay);
       descriptionToDisplay = convertToGreek(descriptionToDisplay);
-      originToDisplay = convertToGreek(originToDisplay);
+      typeToDisplay = convertToGreek(typeToDisplay);
+      exampleToDisplay = convertToGreek(exampleToDisplay);
+      etymologyToDisplay = convertToGreek(etymologyToDisplay);
     }
 
     const synonymsTitle = isGreek ? convertToGreek(translations.tr.synonyms_title) : translations.tr.synonyms_title;
     const descriptionTitle = isGreek ? convertToGreek(translations.tr.description_title) : translations.tr.description_title;
+    const typeTitle = isGreek ? convertToGreek(translations.tr.type_title) : translations.tr.type_title;
+    const exampleTitle = isGreek ? convertToGreek(translations.tr.example_title) : translations.tr.example_title;
     const etymologyTitle = isGreek ? convertToGreek(translations.tr.etymology_title) : translations.tr.etymology_title;
 
     resultDiv.innerHTML = `
         <div class="bg-subtle-light dark:bg-subtle-dark rounded-lg sm:rounded-xl overflow-hidden p-4 sm:p-6">
-            <h2 class="text-2xl font-bold mb-4">${wordToDisplay}</h2>
+            <h2 class="text-3xl font-bold mb-4">${wordToDisplay}</h2>
+            ${typeToDisplay ? `<p class="text-sm text-muted-light dark:text-muted-dark mb-4">${typeToDisplay}</p>` : ''}
+            
+            <hr class="border-t border-subtle-light dark:border-subtle-dark my-4">
+
+            ${descriptionToDisplay ? `
             <div class="mb-4">
-                <span class="font-semibold text-lg">${synonymsTitle}:</span>
-                <span class="text-muted-light dark:text-muted-dark">${synonymsToDisplay}</span>
-            </div>
+                <span class="font-bold text-lg">${descriptionTitle}</span>
+                <p class="text-base mt-1">${descriptionToDisplay}</p>
+            </div>` : ''}
+
+            <hr class="border-t border-subtle-light dark:border-subtle-dark my-4">
+
+            ${etymologyToDisplay ? `
             <div class="mb-4">
-                <span class="font-semibold text-lg">${descriptionTitle}:</span>
-                <p class="text-base">${descriptionToDisplay}</p>
-            </div>
-            <div>
-                <span class="font-semibold text-lg">${etymologyTitle}:</span>
-                <p class="text-base">${originToDisplay}</p>
-            </div>
+                <span class="font-bold text-lg">${etymologyTitle}</span>
+                <p class="text-base mt-1">${etymologyToDisplay}</p>
+            </div>` : ''}
+
+            <hr class="border-t border-subtle-light dark:border-subtle-dark my-4">
+
+            ${exampleToDisplay ? `
+            <div class="mb-4">
+                <span class="font-bold text-lg">${exampleTitle}</span>
+                <p class="text-base mt-1">${exampleToDisplay}</p>
+            </div>` : ''}
+
+            <hr class="border-t border-subtle-light dark:border-subtle-dark my-4">
+
+            ${synonymsToDisplay ? `
+            <div class="mb-4">
+                <span class="font-bold text-lg">${synonymsTitle}</span>
+                <p class="text-base mt-1">${synonymsToDisplay}</p>
+            </div>` : ''}
         </div>
     `;
 }
@@ -405,9 +433,8 @@ function convertToGreek(text) {
     if (!text) return '';
     let convertedText = '';
     for (let char of text) {
-        const latinChar = char;
-        const greekChar = latinToGreekMap[latinChar];
-        convertedText += greekChar || latinChar;
+        const greekChar = latinToGreekMap[char];
+        convertedText += greekChar || char;
     }
     return convertedText;
 }
