@@ -52,7 +52,7 @@ const translations = {
         'feedback_button_text': 'Geri Bildirim',
         'search_placeholder': 'SÖZCÜK ARA...',
         'about_title': 'Hakkında',
-        'about_text_1': 'Bu sözlük, Rum diline ait kelimeleri, açıklamaları ve kökenlerini keşfetmeniz için hazırlanmıştır. Amacımız, Rum dilinin zenginliğini ve kültürel derinliğini daha geniş kitlelere ulaştırmaktır. Veriler, bir Google Sheets tablosundan otomatik olarak çekilerek güncel tutulmaktadır. Kullanıcı arayüzü modern ve duyarlı bir tasarım sunmak için Tailwind CSS kullanılarak oluşturulmuştur.',
+        'about_text_1': 'Bu sözlük, Rum Diline ait kelimeleri ve kökenlerini keşfetmeniz için hazırlanmıştır. Bu dil Anadolu ve Azerbaycan Türkçelerinin karışımı özleştirilmiş ve kolaylaştırılmış yapay bir dildir. Amacım, dilimizin öz zenginliğini kanıtlamaktır.',
         'about_text_2': 'Herhangi bir geri bildiriminiz, öneriniz veya yeni sözcük ekleme isteğiniz varsa, lütfen yukarıdaki menüden "Geri Bildirim" butonunu kullanarak bize ulaşın. Katkılarınızla bu sözlüğü daha da zenginleştirebiliriz!',
         'feedback_title': 'Geri Bildirim',
         'feedback_placeholder': 'Geri bildiriminizi buraya yazın...',
