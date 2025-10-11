@@ -16,7 +16,7 @@ async function fetchWords() {
         const response = await fetch(url);
         allWords = await response.json();
         setupSearch();
-        showPage('about'); // Sayfa yüklendiğinde "Hakkında" sayfasını göster
+        showPage('home'); // Sayfa yüklendiğinde ana sayfayı göster
     } catch (error) {
         console.error('VERİ ÇEKME HATASI:', error);
         document.getElementById('result').innerHTML =
@@ -31,6 +31,7 @@ function showPage(pageId) {
 
     homeContent.classList.add('hidden');
     aboutContent.classList.add('hidden');
+    searchInput.disabled = true;
 
     if (pageId === 'home') {
         homeContent.classList.remove('hidden');
@@ -38,7 +39,6 @@ function showPage(pageId) {
         clearResult();
     } else if (pageId === 'about') {
         aboutContent.classList.remove('hidden');
-        searchInput.disabled = true;
     }
 }
 
@@ -242,6 +242,11 @@ function submitFeedback() {
             console.error('Geri bildirim gönderilirken hata oluştu:', error);
             alert('Bir hata oluştu, lütfen tekrar deneyin.');
         });
+}
+
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenu.classList.toggle('hidden');
 }
 
 // Ana fonksiyonu başlat
