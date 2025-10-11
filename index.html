@@ -1,31 +1,158 @@
-
 <!DOCTYPE html>
-<html lang="tr">
+<html class="dark" lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>RUM DİLİ</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RUM DİLİ SÖZLÜĞÜ</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Clear+Sans:wght@400;700&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1193d4",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101c22",
+                        "foreground-light": "#101c22",
+                        "foreground-dark": "#f6f7f8",
+                        "subtle-light": "#e3e5e7",
+                        "subtle-dark": "#1d2b33",
+                        "muted-light": "#6b7280",
+                        "muted-dark": "#9ca3af"
+                    },
+                    fontFamily: {
+                        "display": ["Clear Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
 </head>
-<body>
-  <div class="top-bar">
-    <a href="/" onclick="clearResult(); return false;" style="text-decoration: none; color: black;">
-      <h1>RUM DİLİ</h1>
-    </a>
-    <p id="feedbackToggle" class="feedback-toggle" onclick="toggleFeedbackForm()">Geri Bildirim Yaz</p>
-  </div>
+<body class="bg-background-light dark:bg-background-dark font-display text-foreground-light dark:text-foreground-dark">
+    <div class="flex flex-col min-h-screen">
+        <header class="border-b border-subtle-light dark:border-subtle-dark">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center gap-4 md:gap-8">
+                        <div class="flex items-center gap-2 text-foreground-light dark:text-foreground-dark">
+                            <svg class="h-8 w-8 text-primary" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M39.5563 34.1455V13.8546C39.5563 15.708 36.8773 17.3437 32.7927 18.3189C30.2914 18.916 27.263 19.2655 24 19.2655C20.737 19.2655 17.7086 18.916 15.2073 18.3189C11.1227 17.3437 8.44365 15.708 8.44365 13.8546V34.1455C8.44365 35.9988 11.1227 37.6346 15.2073 38.6098C17.7086 39.2069 20.737 39.5564 24 39.5564C27.263 39.5564 30.2914 39.2069 32.7927 38.6098C36.8773 37.6346 39.5563 35.9988 39.5563 34.1455Z" fill="currentColor"></path>
+                                <path clip-rule="evenodd" d="M10.4485 13.8519C10.4749 13.9271 10.6203 14.246 11.379 14.7361C12.298 15.3298 13.7492 15.9145 15.6717 16.3735C18.0007 16.9296 20.8712 17.2655 24 17.2655C27.1288 17.2655 29.9993 16.9296 32.3283 16.3735C34.2508 15.9145 35.702 15.3298 36.621 14.7361C37.3796 14.246 37.5251 13.9271 37.5515 13.8519C37.5287 13.7876 37.4333 13.5973 37.0635 13.2931C36.5266 12.8516 35.6288 12.3647 34.343 11.9175C31.79 11.0295 28.1333 10.4437 24 10.4437C19.8667 10.4437 16.2099 11.0295 13.657 11.9175C12.3712 12.3647 11.4734 12.8516 10.9365 13.2931C10.5667 13.5973 10.4713 13.7876 10.4485 13.8519ZM37.5563 18.7877C36.3176 19.3925 34.8502 19.8839 33.2571 20.2642C30.5836 20.9025 27.3973 21.2655 24 21.2655C20.6027 21.2655 17.4164 20.9025 14.7429 20.2642C13.1498 19.8839 11.6824 19.3925 10.4436 18.7877V34.1275C10.4515 34.1545 10.5427 34.4867 11.379 35.027C12.298 35.6207 13.7492 36.2054 15.6717 36.6644C18.0007 37.2205 20.8712 37.5564 24 37.5564C27.1288 37.5564 29.9993 37.2205 32.3283 36.6644C34.2508 36.2054 35.702 35.6207 36.621 35.027C37.4573 34.4867 37.5485 34.1546 37.5563 34.1275V18.7877ZM41.5563 13.8546V34.1455C41.5563 36.1078 40.158 37.5042 38.7915 38.3869C37.3498 39.3182 35.4192 40.0389 33.2571 40.5551C30.5836 41.1934 27.3973 41.5564 24 41.5564C20.6027 41.5564 17.4164 41.1934 14.7429 40.5551C12.5808 40.0389 10.6502 39.3182 9.20848 38.3869C7.84205 37.5042 6.44365 36.1078 6.44365 34.1455L6.44365 13.8546C6.44365 12.2684 7.37223 11.0454 8.39581 10.2036C9.43325 9.3505 10.8137 8.67141 12.343 8.13948C15.4203 7.06909 19.5418 6.44366 24 6.44366C28.4582 6.44366 32.5797 7.06909 35.657 8.13948C37.1863 8.67141 38.5667 9.3505 39.6042 10.2036C40.6278 11.0454 41.5563 12.2684 41.5563 13.8546Z" fill="currentColor" fill-rule="evenodd"></path>
+                            </svg>
+                            <h1 class="text-xl font-bold cursor-pointer" onclick="showPage('home')">RUM DİLİ</h1>
+                        </div>
+                        <nav class="hidden md:flex items-center gap-8">
+                            <a class="text-base font-medium hover:text-primary transition-colors cursor-pointer" onclick="toggleFeedbackForm()">Geri Bildirim</a>
+                            <a class="text-base font-medium hover:text-primary transition-colors cursor-pointer" onclick="showPage('about')">Hakkında</a>
+                        </nav>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="p-2 rounded-full hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors" onclick="toggleFeedbackForm()">
+                            <svg class="w-6 h-6 text-muted-light dark:text-muted-dark" fill="currentColor" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,116a4,4,0,0,1-4,4H88a4,4,0,0,1,0-8h32a4,4,0,0,1,4,4Zm20.87-43.25a32,32,0,0,0-58.28-21.75c-.39-.77-4.22-6.57-2.61-9a10.83,10.83,0,0,1,2.83-4.13,32.32,32.32,0,0,1,41.22-4.16,33.51,33.51,0,0,1,16.84,18.72l-.76.76c-1.5,1.5-3,3.33-4.5,5.16-1.5,1.83-3,3.66-4.5,5.49a4,4,0,0,1-6.6-4.52l.76-.76a25.33,25.33,0,0,0-13.3-14.86,24.3,24.3,0,0,0-30.85,3A24.23,24.23,0,0,0,105.75,93a24.1,24.1,0,0,0,11.3,16.89,4,4,0,0,1,1.88,4.72,4,4,0,0,1-4.72,1.88Z"></path></svg>
+                        </button>
+                        <button class="p-2 rounded-full hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors" id="theme-toggle">
+                            <svg class="w-6 h-6 text-muted-light dark:text-muted-dark hidden" fill="currentColor" id="theme-toggle-dark-icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                            <svg class="w-6 h-6 text-muted-light dark:text-muted-dark hidden" fill="currentColor" id="theme-toggle-light-icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.121-3.536a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM4.95 6.364a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707zM15.636 4.95a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM1.05 10.95a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1z" fill-rule="evenodd"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+            <div id="home-content" class="max-w-4xl mx-auto">
+                <div class="relative mb-8 md:mb-12">
+                    <div class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 sm:h-6 sm:w-6 text-primary" fill="currentColor" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+                        </svg>
+                    </div>
+                    <input class="w-full h-14 sm:h-16 pl-10 sm:pl-14 pr-4 text-base sm:text-lg bg-subtle-light dark:bg-subtle-dark border-0 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary focus:outline-none placeholder:text-foreground-light dark:placeholder:text-foreground-dark font-semibold" id="searchInput" placeholder="SÖZCÜK ARA..." type="search" autocomplete="off"/>
+                    <div id="suggestions-container" class="absolute top-full left-0 right-0 z-10 mt-2 rounded-lg sm:rounded-xl bg-subtle-light dark:bg-subtle-dark border border-subtle-light dark:border-subtle-dark shadow-lg hidden">
+                        <div id="suggestions" class="max-h-[20rem] overflow-y-auto p-2"></div>
+                    </div>
+                </div>
+                <div id="result" class="mb-8 md:mb-12"></div>
+            </div>
 
-  <input type="text" id="searchInput" placeholder="SÖZCÜK ARA..." autocomplete="off">
-  <div id="suggestions-container">
-    <div id="suggestions"></div>
-  </div>
-  <div id="result"></div>
+            <div id="about-content" class="max-w-4xl mx-auto hidden">
+                <div class="bg-subtle-light dark:bg-subtle-dark rounded-lg sm:rounded-xl p-6 sm:p-8">
+                    <h2 class="text-2xl font-bold mb-4">Hakkında</h2>
+                    <p class="text-base text-muted-light dark:text-muted-dark leading-relaxed">
+                        Bu sözlük, Rum diline ait kelimeleri, açıklamaları ve kökenlerini keşfetmeniz için hazırlanmıştır. Amacımız, Rum dilinin zenginliğini ve kültürel derinliğini daha geniş kitlelere ulaştırmaktır.
+                        Veriler, bir Google Sheets tablosundan otomatik olarak çekilerek güncel tutulmaktadır. Kullanıcı arayüzü modern ve duyarlı bir tasarım sunmak için Tailwind CSS kullanılarak oluşturulmuştur.
+                    </p>
+                    <p class="text-base text-muted-light dark:text-muted-dark leading-relaxed mt-4">
+                        Herhangi bir geri bildiriminiz, öneriniz veya yeni sözcük ekleme isteğiniz varsa, lütfen yukarıdaki menüden "Geri Bildirim" butonunu kullanarak bize ulaşın. Katkılarınızla bu sözlüğü daha da zenginleştirebiliriz!
+                    </p>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+    
+    <div id="feedbackModal" class="fixed inset-0 z-50 bg-background-light/90 dark:bg-background-dark/90 flex items-center justify-center hidden">
+        <div class="relative w-full max-w-2xl mx-auto p-6 sm:p-8 bg-subtle-light dark:bg-subtle-dark rounded-lg sm:rounded-xl shadow-xl">
+            <button class="absolute top-4 right-4 p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark transition-colors" onclick="toggleFeedbackForm()">
+                <svg class="w-6 h-6 text-muted-light dark:text-muted-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-bold mb-4">Geri Bildirim</h2>
+            <textarea id="feedbackText" class="w-full h-40 p-3 bg-background-light dark:bg-background-dark border-0 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none placeholder:text-muted-light dark:placeholder:text-muted-dark" placeholder="Geri bildiriminizi buraya yazın..."></textarea>
+            <div class="flex justify-end gap-2 mt-4">
+                <button class="px-4 py-2 rounded-lg sm:rounded-xl bg-muted-light text-foreground-light dark:bg-muted-dark dark:text-foreground-dark hover:bg-muted-dark hover:text-white transition-colors" onclick="toggleFeedbackForm()">İptal</button>
+                <button class="px-4 py-2 rounded-lg sm:rounded-xl bg-primary text-white hover:bg-primary/80 transition-colors" onclick="submitFeedback()">Gönder</button>
+            </div>
+        </div>
+    </div>
 
-  <div id="feedbackForm">
-    <textarea id="feedbackText" placeholder="Geri bildiriminizi buraya yazın..."></textarea>
-    <button onclick="submitFeedback()">Gönder</button>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
+    <script>
+        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+        var themeToggleButton = document.getElementById('theme-toggle');
+        themeToggleButton.addEventListener('click', function() {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+    </script>
 </body>
 </html>
