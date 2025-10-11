@@ -15,8 +15,8 @@ let isGreek = false; // Alfabenin başlangıç durumu (Latin)
 const latinToGreekMap = {
     "a":"Α","A":"Α",
     "e":"Ε","E":"Ε",
-    "i":"Ͱ","I":"Ͱ", // i ve İ farklı
-    "ı":"Ь","İ":"Ь", // ı ve I farklı
+    "i":"Ͱ","İ":"Ͱ",
+    "ı":"Ь","I":"Ь",
     "n":"Ν","N":"Ν",
     "r":"Ρ","R":"Ρ",
     "l":"L","L":"L",
@@ -143,7 +143,7 @@ function setupSearch() {
 
     searchInput.addEventListener('input', function () {
         const rawQuery = this.value.trim();
-        const query = normalizeString(rawQuery);
+        const query = normalizeString(rawQuery); // Doğrudan normalize et, dönüştürme yapma
 
         if (!query) {
             suggestionsDiv.innerHTML = '';
