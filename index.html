@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>RUM DİLİ SÖZLÜĞÜ</title>
+    <title>RUM DİLİ</title>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Clear+Sans:wght@400;700&display=swap" rel="stylesheet"/>
@@ -60,22 +60,34 @@
                             <h1 class="text-xl font-bold cursor-pointer" onclick="showPage('home')">RUM DİLİ</h1>
                         </div>
                         <nav class="hidden md:flex items-center gap-8">
-                            <a class="text-base font-medium hover:text-primary transition-colors cursor-pointer" onclick="toggleFeedbackForm()">Geri Bildirim</a>
                             <a class="text-base font-medium hover:text-primary transition-colors cursor-pointer" onclick="showPage('about')">Hakkında</a>
+                            <a class="text-base font-medium hover:text-primary transition-colors cursor-pointer" onclick="toggleFeedbackForm()">Geri Bildirim</a>
                         </nav>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button class="p-2 rounded-full hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors" onclick="toggleFeedbackForm()">
+                        <button class="p-2 rounded-full hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors hidden md:block" onclick="toggleFeedbackForm()">
                             <svg class="w-6 h-6 text-muted-light dark:text-muted-dark" fill="currentColor" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,116a4,4,0,0,1-4,4H88a4,4,0,0,1,0-8h32a4,4,0,0,1,4,4Zm20.87-43.25a32,32,0,0,0-58.28-21.75c-.39-.77-4.22-6.57-2.61-9a10.83,10.83,0,0,1,2.83-4.13,32.32,32.32,0,0,1,41.22-4.16,33.51,33.51,0,0,1,16.84,18.72l-.76.76c-1.5,1.5-3,3.33-4.5,5.16-1.5,1.83-3,3.66-4.5,5.49a4,4,0,0,1-6.6-4.52l.76-.76a25.33,25.33,0,0,0-13.3-14.86,24.3,24.3,0,0,0-30.85,3A24.23,24.23,0,0,0,105.75,93a24.1,24.1,0,0,0,11.3,16.89,4,4,0,0,1,1.88,4.72,4,4,0,0,1-4.72,1.88Z"></path></svg>
                         </button>
                         <button class="p-2 rounded-full hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors" id="theme-toggle">
                             <svg class="w-6 h-6 text-muted-light dark:text-muted-dark hidden" fill="currentColor" id="theme-toggle-dark-icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
                             <svg class="w-6 h-6 text-muted-light dark:text-muted-dark hidden" fill="currentColor" id="theme-toggle-light-icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.121-3.536a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM4.95 6.364a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707zM15.636 4.95a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM1.05 10.95a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1z" fill-rule="evenodd"></path></svg>
                         </button>
+                        <button class="md:hidden p-2 rounded-md hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors" onclick="toggleMobileMenu()">
+                            <svg class="w-6 h-6 text-muted-light dark:text-muted-dark" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="19" cy="12" r="1"></circle>
+                                <circle cx="5" cy="12" r="1"></circle>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
+            <div id="mobile-menu" class="md:hidden hidden bg-subtle-light dark:bg-subtle-dark border-b border-subtle-light dark:border-subtle-dark py-2 px-4">
+                <a class="block text-base font-medium hover:text-primary transition-colors cursor-pointer px-4 py-2" onclick="showPage('about'); toggleMobileMenu();">Hakkında</a>
+                <a class="block text-base font-medium hover:text-primary transition-colors cursor-pointer px-4 py-2" onclick="toggleFeedbackForm(); toggleMobileMenu();">Geri Bildirim</a>
+            </div>
         </header>
+
         <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
             <div id="home-content" class="max-w-4xl mx-auto">
                 <div class="relative mb-8 md:mb-12">
@@ -104,10 +116,9 @@
                     </p>
                 </div>
             </div>
-            
         </main>
     </div>
-    
+
     <div id="feedbackModal" class="fixed inset-0 z-50 bg-background-light/90 dark:bg-background-dark/90 flex items-center justify-center hidden">
         <div class="relative w-full max-w-2xl mx-auto p-6 sm:p-8 bg-subtle-light dark:bg-subtle-dark rounded-lg sm:rounded-xl shadow-xl">
             <button class="absolute top-4 right-4 p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark transition-colors" onclick="toggleFeedbackForm()">
