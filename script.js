@@ -1,12 +1,104 @@
+// Dizeleri standart bir formata dönüştürür (küçük harfe çevirme gibi).
+// Bu, arama ve eşleştirme işlemlerinin daha tutarlı olmasını sağlar.
 function normalizeString(str) {
     if (!str) return '';
     return str.toLowerCase();
 }
 
+// Uygulamanın genel durumunu tutan değişkenler.
 let allWords = [];
 let lastSelectedWord = null;
 let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+let isGreek = false; // Alfabenin başlangıç durumu (Latin)
 
+// Harf dönüşüm eşleşmelerini burada tanımlayalım.
+const latinToGreekMap = {
+    "a":"Α","A":"Α",
+    "e":"Ε","E":"Ε",
+    "i":"Ͱ","İ":"Ͱ",
+    "n":"Ν","N":"Ν",
+    "r":"Ρ","R":"Ρ",
+    "l":"L","L":"L",
+    "ı":"Ь","I":"Ь",
+    "k":"Κ","K":"Κ",
+    "d":"D","D":"D",
+    "m":"Μ","M":"Μ",
+    "t":"Τ","T":"Τ",
+    "y":"J","Y":"J",
+    "s":"Σ","S":"Σ",
+    "u":"Υ","U":"Υ",
+    "o":"Ϙ","O":"Ϙ",
+    "b":"Β","B":"Β",
+    "ş":"Ш","Ş":"Ш",
+    "ü":"U","Ü":"U",
+    "z":"Ζ","Z":"Ζ",
+    "g":"Γ","G":"Γ",
+    "ç":"C","Ç":"C",
+    "ğ":"R","Ğ":"R",
+    "v":"F","V":"F",
+    "c":"G","C":"G",
+    "h":"Η","H":"Η",
+    "p":"Π","P":"Π",
+    "ö":"Ω","Ö":"Ω",
+    "f":"V","F":"V",
+    "x":"Ψ","X":"Ψ",
+    "j":"Ϸ","J":"Ϸ"
+};
+
+// Yunan alfabesinden Latin alfabesine dönüşüm için ters eşleşme haritası oluştur.
+const greekToLatinMap = {};
+for (const key in latinToGreekMap) {
+    const value = latinToGreekMap[key];
+    greekToLatinMap[value] = key;
+}
+
+const translations = {
+    'tr': {
+        'title': 'RUM DİLİ',
+        'about_page_text': 'Hakkında',
+        'feedback_button_text': 'Geri Bildirim',
+        'search_placeholder': 'SÖZCÜK ARA...',
+        'about_title': 'Hakkında',
+        'about_text_1': 'Bu sözlük, Rum diline ait kelimeleri, açıklamaları ve kökenlerini keşfetmeniz için hazırlanmıştır. Amacımız, Rum dilinin zenginliğini ve kültürel derinliğini daha geniş kitlelere ulaştırmaktır. Veriler, bir Google Sheets tablosundan otomatik olarak çekilerek güncel tutulmaktadır. Kullanıcı arayüzü modern ve duyarlı bir tasarım sunmak için Tailwind CSS kullanılarak oluşturulmuştur.',
+        'about_text_2': 'Herhangi bir geri bildiriminiz, öneriniz veya yeni sözcük ekleme isteğiniz varsa, lütfen yukarıdaki menüden "Geri Bildirim" butonunu kullanarak bize ulaşın. Katkılarınızla bu sözlüğü daha da zenginleştirebiliriz!',
+        'feedback_title': 'Geri Bildirim',
+        'feedback_placeholder': 'Geri bildiriminizi buraya yazın...',
+        'feedback_cancel': 'İptal',
+        'feedback_send': 'Gönder',
+        'word_title': 'Sözcük',
+        'synonyms_title': 'Eş Anlamlılar',
+        'description_title': 'Açıklama',
+        'etymology_title': 'Köken',
+        'not_found': 'Bulunmamaktadır.',
+        'no_result': 'Sonuç bulunamadı'
+    },
+    'gr': {} // Bu kısım convertToGreek fonksiyonuyla dinamik olarak doldurulacak
+};
+
+// Sayfadaki metinleri günceller.
+function updateText(lang) {
+    const textElements = document.querySelectorAll('[data-key]');
+    textElements.forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (translations[lang][key]) {
+            el.textContent = translations[lang][key];
+        } else if (lang === 'gr' && translations['tr'][key]) {
+            el.textContent = convertToGreek(translations['tr'][key]);
+        }
+    });
+
+    const placeholderElements = document.querySelectorAll('[data-key][placeholder]');
+    placeholderElements.forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (translations[lang][key]) {
+            el.placeholder = translations[lang][key];
+        } else if (lang === 'gr' && translations['tr'][key]) {
+            el.placeholder = convertToGreek(translations['tr'][key]);
+        }
+    });
+}
+
+// Google Sheets'ten verileri çeker.
 async function fetchWords() {
     const sheetId = '1R01aIajx6dzHlO-KBiUXUmld2AEvxjCQkUTFGYB3EDM';
     const sheetName = 'Sözlük';
@@ -16,7 +108,10 @@ async function fetchWords() {
         const response = await fetch(url);
         allWords = await response.json();
         setupSearch();
-        showPage('home');
+        setupAlphabetToggle(); // Yeni eklenen alfabe tuşunu kurar
+        showPage('home'); // Sayfa yüklendiğinde ana sayfayı gösterir.
+        // Başlangıçta Türkçe metinleri ayarlayalım.
+        updateText('tr');
     } catch (error) {
         console.error('VERİ ÇEKME HATASI:', error);
         document.getElementById('result').innerHTML =
@@ -24,6 +119,7 @@ async function fetchWords() {
     }
 }
 
+// Hangi sayfanın (ana sayfa veya hakkında) görüntüleneceğini kontrol eder.
 function showPage(pageId) {
     const homeContent = document.getElementById('home-content');
     const aboutContent = document.getElementById('about-content');
@@ -43,6 +139,7 @@ function showPage(pageId) {
 }
 
 
+// Arama kutusu ve önerilerle ilgili olay dinleyicilerini kurar.
 function setupSearch() {
     const searchInput = document.getElementById('searchInput');
     const suggestionsDiv = document.getElementById('suggestions');
@@ -52,7 +149,14 @@ function setupSearch() {
 
     searchInput.addEventListener('input', function () {
         const rawQuery = this.value.trim();
-        const query = normalizeString(rawQuery);
+        let query;
+
+        // Yunan alfabesi modundaysa, metni Latin'e dönüştürerek ara
+        if (isGreek) {
+            query = normalizeString(convertToLatin(rawQuery));
+        } else {
+            query = normalizeString(rawQuery);
+        }
 
         if (!query) {
             suggestionsDiv.innerHTML = '';
@@ -99,13 +203,41 @@ function setupSearch() {
     }
 }
 
+// Alfabe değiştirme tuşu için olay dinleyicilerini kurar.
+function setupAlphabetToggle() {
+    const toggleButton = document.getElementById('alphabet-toggle');
+    toggleButton.addEventListener('click', toggleAlphabet);
+}
+
+// Harfleri değiştirme fonksiyonu
+function toggleAlphabet() {
+    isGreek = !isGreek;
+    
+    // Simgeyi değiştirir
+    document.getElementById('alphabet-toggle-latin').classList.toggle('hidden', isGreek);
+    document.getElementById('alphabet-toggle-cyrillic').classList.toggle('hidden', !isGreek);
+
+    // Tüm arayüz metinlerini günceller.
+    const lang = isGreek ? 'gr' : 'tr';
+    updateText(lang);
+
+    // Sonuç sayfasındaki metni günceller.
+    if (lastSelectedWord) {
+        showResult(lastSelectedWord);
+    }
+    // Arama geçmişini günceller
+    displaySearchHistory();
+}
+
+// Eşleşen sözcükler için öneri listesini görüntüler.
 function displaySuggestions(matches, query) {
     const suggestionsDiv = document.getElementById('suggestions');
     suggestionsDiv.innerHTML = '';
     const suggestionsContainer = document.getElementById('suggestions-container');
 
     if (matches.length === 0) {
-        suggestionsDiv.innerHTML = `<div class="p-4 text-muted-light dark:text-muted-dark">Sonuç bulunamadı</div>`;
+        const noResultText = isGreek ? convertToGreek(translations.tr.no_result) : translations.tr.no_result;
+        suggestionsDiv.innerHTML = `<div class="p-4 text-muted-light dark:text-muted-dark">${noResultText}</div>`;
         suggestionsContainer.classList.remove('hidden');
         return;
     }
@@ -118,19 +250,27 @@ function displaySuggestions(matches, query) {
         const suggestion = document.createElement('div');
         suggestion.className = 'suggestion cursor-pointer p-4 hover:bg-background-light dark:hover:bg-background-dark transition-colors border-b border-subtle-light dark:border-subtle-dark last:border-b-0';
 
+        let wordToDisplay = match.type === 'main' ? match.word : match.synonym;
+        let mainWordToDisplay = match.type === 'synonym' ? match.main : '';
+
+        if (isGreek) {
+            wordToDisplay = convertToGreek(wordToDisplay);
+            mainWordToDisplay = convertToGreek(mainWordToDisplay);
+        }
+
         if (match.type === 'main') {
-            suggestion.innerHTML = `<span class="font-bold">${match.word}</span>`;
+            suggestion.innerHTML = `<span class="font-bold">${wordToDisplay}</span>`;
         } else {
             suggestion.innerHTML = `
-                <span class="font-bold">${match.synonym}</span>
-                <span class="text-muted-light dark:text-muted-dark ml-2 text-sm">${match.main}</span>
+                <span class="font-bold">${wordToDisplay}</span>
+                <span class="text-muted-light dark:text-muted-dark ml-2 text-sm">${mainWordToDisplay}</span>
             `;
         }
 
         suggestion.addEventListener('mousedown', (e) => {
             e.preventDefault();
             selectWord(match.data);
-            document.getElementById('searchInput').focus();
+            document.getElementById('searchInput').focus(); // Arama kutusunun odaklanmasını korur
         });
         suggestionsDiv.appendChild(suggestion);
     });
@@ -138,6 +278,7 @@ function displaySuggestions(matches, query) {
     suggestionsContainer.classList.remove('hidden');
 }
 
+// Bir sözcük seçildiğinde sonuçları gösterir ve geçmişi günceller.
 function selectWord(word) {
     lastSelectedWord = word;
     document.getElementById('searchInput').value = word.Sözcük;
@@ -147,27 +288,46 @@ function selectWord(word) {
     updateSearchHistory(word.Sözcük);
 }
 
+// Seçilen sözcüğün detaylarını ekranda görüntüler.
 function showResult(word) {
     const resultDiv = document.getElementById('result');
+    
+    let wordToDisplay = word.Sözcük;
+    let synonymsToDisplay = word['Eş Anlamlılar'] || translations.tr.not_found;
+    let descriptionToDisplay = word.Açıklama || translations.tr.not_found;
+    let originToDisplay = word.Öz || translations.tr.not_found;
+
+    if (isGreek) {
+      wordToDisplay = convertToGreek(wordToDisplay);
+      synonymsToDisplay = convertToGreek(synonymsToDisplay);
+      descriptionToDisplay = convertToGreek(descriptionToDisplay);
+      originToDisplay = convertToGreek(originToDisplay);
+    }
+
+    const synonymsTitle = isGreek ? convertToGreek(translations.tr.synonyms_title) : translations.tr.synonyms_title;
+    const descriptionTitle = isGreek ? convertToGreek(translations.tr.description_title) : translations.tr.description_title;
+    const etymologyTitle = isGreek ? convertToGreek(translations.tr.etymology_title) : translations.tr.etymology_title;
+
     resultDiv.innerHTML = `
         <div class="bg-subtle-light dark:bg-subtle-dark rounded-lg sm:rounded-xl overflow-hidden p-4 sm:p-6">
-            <h2 class="text-2xl font-bold mb-4">${word.Sözcük}</h2>
+            <h2 class="text-2xl font-bold mb-4">${wordToDisplay}</h2>
             <div class="mb-4">
-                <span class="font-semibold text-lg">Eş Anlamlılar:</span>
-                <span class="text-muted-light dark:text-muted-dark">${word['Eş Anlamlılar'] || 'Bulunmamaktadır.'}</span>
+                <span class="font-semibold text-lg">${synonymsTitle}:</span>
+                <span class="text-muted-light dark:text-muted-dark">${synonymsToDisplay}</span>
             </div>
             <div class="mb-4">
-                <span class="font-semibold text-lg">Açıklama:</span>
-                <p class="text-base">${word.Açıklama || 'Açıklama bulunmamaktadır.'}</p>
+                <span class="font-semibold text-lg">${descriptionTitle}:</span>
+                <p class="text-base">${descriptionToDisplay}</p>
             </div>
             <div>
-                <span class="font-semibold text-lg">Köken:</span>
-                <p class="text-base">${word.Öz || 'Köken bilgisi bulunmamaktadır.'}</p>
+                <span class="font-semibold text-lg">${etymologyTitle}:</span>
+                <p class="text-base">${originToDisplay}</p>
             </div>
         </div>
     `;
 }
 
+// Arama kutusunu ve sonuçları temizler.
 function clearResult() {
     document.getElementById('result').innerHTML = '';
     document.getElementById('searchInput').value = '';
@@ -175,6 +335,7 @@ function clearResult() {
     displaySearchHistory();
 }
 
+// Arama geçmişini localStorage'da günceller.
 function updateSearchHistory(query) {
     const historyIndex = searchHistory.indexOf(query);
     if (historyIndex > -1) {
@@ -188,6 +349,7 @@ function updateSearchHistory(query) {
     localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
 }
 
+// Arama geçmişini öneri listesi olarak görüntüler.
 function displaySearchHistory() {
     const suggestionsDiv = document.getElementById('suggestions');
     const suggestionsContainer = document.getElementById('suggestions-container');
@@ -198,7 +360,10 @@ function displaySearchHistory() {
         searchHistory.slice(0, 12).forEach(history => {
             const suggestion = document.createElement('div');
             suggestion.className = 'suggestion cursor-pointer p-4 hover:bg-background-light dark:hover:bg-background-dark transition-colors border-b border-subtle-light dark:border-subtle-dark last:border-b-0';
-            suggestion.innerHTML = `<span class="font-bold">${history}</span>`;
+            
+            let historyToDisplay = isGreek ? convertToGreek(history) : history;
+
+            suggestion.innerHTML = `<span class="font-bold">${historyToDisplay}</span>`;
 
             suggestion.addEventListener('mousedown', (e) => {
                 e.preventDefault();
@@ -211,11 +376,13 @@ function displaySearchHistory() {
     }
 }
 
+// Geri bildirim modalını gösterir veya gizler.
 function toggleFeedbackForm() {
     const feedbackModal = document.getElementById('feedbackModal');
     feedbackModal.classList.toggle('hidden');
 }
 
+// Geri bildirim verilerini SheetDB'ye gönderir.
 function submitFeedback() {
     const feedbackText = document.getElementById('feedbackText').value.trim();
     if (!feedbackText) {
@@ -241,9 +408,34 @@ function submitFeedback() {
         });
 }
 
+// Mobil menüyü gösterir veya gizler.
 function toggleMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
     mobileMenu.classList.toggle('hidden');
+}
+
+// Metni Rum alfabesine dönüştürme fonksiyonu
+function convertToGreek(text) {
+    if (!text) return '';
+    let convertedText = '';
+    for (let char of text) {
+        const latinChar = char;
+        const greekChar = latinToGreekMap[latinChar];
+        convertedText += greekChar || latinChar;
+    }
+    return convertedText;
+}
+
+// Metni Latin alfabesine dönüştürme fonksiyonu
+function convertToLatin(text) {
+    if (!text) return '';
+    let convertedText = '';
+    for (let char of text) {
+        const greekChar = char;
+        const latinChar = greekToLatinMap[greekChar];
+        convertedText += latinChar || greekChar;
+    }
+    return convertedText;
 }
 
 fetchWords();
