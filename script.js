@@ -16,7 +16,7 @@ async function fetchWords() {
         const response = await fetch(url);
         allWords = await response.json();
         setupSearch();
-        showPage('home'); // Sayfa yüklendiğinde ana sayfayı göster
+        showPage('home');
     } catch (error) {
         console.error('VERİ ÇEKME HATASI:', error);
         document.getElementById('result').innerHTML =
@@ -48,7 +48,6 @@ function setupSearch() {
     const suggestionsDiv = document.getElementById('suggestions');
     const resultDiv = document.getElementById('result');
 
-    // Sayfa yüklendiğinde geçmiş aramaları göster
     displaySearchHistory();
 
     searchInput.addEventListener('input', function () {
@@ -57,7 +56,6 @@ function setupSearch() {
 
         if (!query) {
             suggestionsDiv.innerHTML = '';
-            // Arama kutusu boşken sonuç div'ini temizle
             resultDiv.innerHTML = '';
             displaySearchHistory();
             return;
@@ -96,7 +94,6 @@ function setupSearch() {
         }
     });
 
-    // Sayfa yüklendiğinde, eğer daha önce bir arama yapılmışsa, sonucu göster
     if (lastSelectedWord) {
         showResult(lastSelectedWord);
     }
@@ -133,7 +130,7 @@ function displaySuggestions(matches, query) {
         suggestion.addEventListener('mousedown', (e) => {
             e.preventDefault();
             selectWord(match.data);
-            document.getElementById('searchInput').focus(); // Arama kutusunun odaklanmasını korur
+            document.getElementById('searchInput').focus();
         });
         suggestionsDiv.appendChild(suggestion);
     });
@@ -249,5 +246,4 @@ function toggleMobileMenu() {
     mobileMenu.classList.toggle('hidden');
 }
 
-// Ana fonksiyonu başlat
 fetchWords();
