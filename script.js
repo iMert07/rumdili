@@ -47,10 +47,10 @@ const latinToGreekMap = {
 
 const translations = {
     'tr': {
-        'title': 'RUM DİLİ',
+        'title': 'Rum Dilş',
         'about_page_text': 'Hakkında',
         'feedback_button_text': 'Geri Bildirim',
-        'search_placeholder': 'SÖZCÜK ARA...',
+        'search_placeholder': 'Kelime ara...',
         'about_title': 'Hakkında',
         'about_text_1': 'Bu sözlük, Rum Diline ait kelimeleri ve kökenlerini keşfetmeniz için hazırlanmıştır. Bu dil Anadolu ve Azerbaycan Türkçelerinin karışımıyla özleştirilmiş ve kolaylaştırılmış yapay bir dildir. Amacım, dilimizin öz zenginliğini kanıtlamaktır.',
         'about_text_2': 'Herhangi bir geri bildiriminiz, öneriniz veya yeni sözcük ekleme isteğiniz varsa; lütfen yukarıdaki menüden "Geri Bildirim" butonunu kullanarak bana ulaşın. Katkılarınızla bu sözlüğü daha da zenginleştirebiliriz!',
