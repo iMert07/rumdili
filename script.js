@@ -47,7 +47,7 @@ const latinToGreekMap = {
 
 const translations = {
     'tr': {
-        'title': 'Rum Dilş',
+        'title': 'Rum Dili',
         'about_page_text': 'Hakkında',
         'feedback_button_text': 'Geri Bildirim',
         'search_placeholder': 'Kelime ara...',
