@@ -1,3 +1,4 @@
+
 // Dizeleri standart bir formata dönüştürür (küçük harfe çevirme gibi).
 // Bu, arama ve eşleştirme işlemlerinin daha tutarlı olmasını sağlar.
 function normalizeString(str) {
@@ -156,19 +157,54 @@ function setupSearch() {
         allWords.forEach(row => {
             const mainWord = row.Sözcük || '';
             const mainNorm = normalizeString(mainWord);
+            
+            // Eş Anlamlılar: Virgülle ayırıp temizle
             const synonyms = row['Eş Anlamlılar']
                 ? row['Eş Anlamlılar'].split(',').map(s => s.trim())
                 : [];
+            
+            // YENİ: Tür: Virgülle ayırıp temizle, bu sayede "İsim, Latince Ad" gibi değerler aranabilir olur.
+            const types = row.Tür
+                ? row.Tür.split(',').map(s => s.trim())
+                : [];
 
+            let alreadyMatched = false;
+
+            // 1. Sözcük eşleşmesi (En yüksek öncelik)
             if (mainNorm.startsWith(query)) {
                 matches.push({ type: 'main', word: mainWord, data: row });
-            } else {
-                synonyms.forEach(syn => {
-                    if (normalizeString(syn).startsWith(query)) {
-                        matches.push({ type: 'synonym', synonym: syn, main: mainWord, data: row });
-                    }
-                });
+                alreadyMatched = true;
+                return; // Ana kelime eşleştiyse diğer kontrollere gerek yok.
             }
+            
+            // 2. Eş anlamlı kelime eşleşmesi
+            let synonymMatch = false;
+            synonyms.forEach(syn => {
+                if (normalizeString(syn).startsWith(query)) {
+                    if (!synonymMatch) { // Sadece ilk eşleşmeyi ekle
+                         matches.push({ type: 'synonym', synonym: syn, main: mainWord, data: row });
+                         synonymMatch = true;
+                         alreadyMatched = true;
+                    }
+                }
+            });
+            
+            // Eş anlamlıda eşleştiyse, Tür kontrolüne gerek kalmaz.
+            if (alreadyMatched) {
+                return;
+            }
+
+            // 3. Tür eşleşmesi (Her bir terimi kontrol et)
+            types.forEach(typeValue => {
+                if (normalizeString(typeValue).startsWith(query)) {
+                    // Sadece daha önce eşleşmediyse ekle
+                     if (!alreadyMatched) {
+                        // typeValue: Kullanıcının arama yaptığı terim (örn: "camelus")
+                        matches.push({ type: 'type', word: mainWord, typeValue: typeValue, data: row });
+                        alreadyMatched = true; // Sadece bir kere eklenmesini sağla
+                    }
+                }
+            });
         });
 
         displaySuggestions(matches, query);
@@ -230,27 +266,48 @@ function displaySuggestions(matches, query) {
     }
 
     matches.sort((a, b) => {
-        const aWord = a.type === 'main' ? a.word : a.synonym;
-        const bWord = b.type === 'main' ? b.word : b.synonym;
+        // Sıralama için ana kelimeyi (Sözcük) kullanmaya devam edelim
+        const aWord = a.data.Sözcük; 
+        const bWord = b.data.Sözcük;
         return normalizeString(aWord).localeCompare(normalizeString(bWord));
     }).slice(0, 12).forEach(match => {
         const suggestion = document.createElement('div');
         suggestion.className = 'suggestion cursor-pointer p-4 hover:bg-background-light dark:hover:bg-background-dark transition-colors border-b border-subtle-light dark:border-subtle-dark last:border-b-0';
 
-        let wordToDisplay = match.type === 'main' ? match.word : match.synonym;
-        let mainWordToDisplay = match.type === 'synonym' ? match.main : '';
+        let primaryMatchText = ''; // Solda kalın gösterilecek (Aranan terim veya Ana Kelime)
+        let secondaryInfo = '';     // Sağda hafif gösterilecek (Ana Madde Adı)
 
-        if (isGreek) {
-            wordToDisplay = convertToGreek(wordToDisplay);
-            mainWordToDisplay = convertToGreek(mainWordToDisplay);
+        
+        if (match.type === 'main') {
+            // Ana Kelime Araması: Solda Ana Kelime
+            primaryMatchText = match.word;
+            secondaryInfo = '';
+        } else if (match.type === 'synonym') {
+            // Eş Anlamlı Araması: Solda Eş Anlamlı (Aranan), Sağda Ana Kelime
+            primaryMatchText = match.synonym; 
+            secondaryInfo = match.main; // Ana kelime (madde adı)
+        } else if (match.type === 'type') {
+            // Tür Araması (İstenen Mantık): Solda Tür Değeri (Aranan), Sağda Ana Kelime
+            primaryMatchText = match.typeValue; // Örneğin "camelus" veya "isim"
+            secondaryInfo = match.word;        // Örneğin "Deve" veya "Kitap"
         }
 
+
+        // Rum alfabesine dönüştürme
+        if (isGreek) {
+            primaryMatchText = convertToGreek(primaryMatchText);
+            secondaryInfo = convertToGreek(secondaryInfo);
+        }
+        
+        // Öneri görünümünü ayarla
         if (match.type === 'main') {
-            suggestion.innerHTML = `<span class="font-bold">${wordToDisplay}</span>`;
+            // Sadece ana kelimeyi göster
+            suggestion.innerHTML = `<span class="font-bold">${primaryMatchText}</span>`;
         } else {
-            suggestion.innerHTML = `
-                <span class="font-bold">${wordToDisplay}</span>
-                <span class="text-muted-light dark:text-muted-dark ml-2 text-sm">${mainWordToDisplay}</span>
+            // Eş anlamlı veya Tür araması: Solda aranan terim, sağda Ana kelime/Madde Adı
+             suggestion.innerHTML = `
+                <span class="font-bold">${primaryMatchText}</span>
+                <span class="text-muted-light dark:text-muted-dark ml-2 text-sm">${secondaryInfo}</span>
             `;
         }
 
